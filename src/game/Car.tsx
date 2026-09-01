@@ -40,7 +40,7 @@ interface VehicleState {
 }
 
 function spawnAt(index: number): Pick<VehicleState, "x" | "y" | "z" | "yaw"> {
-  const s = samples[((index % SAMPLE_COUNT) + SAMPLE_COUNT) % SAMPLE_COUNT];
+  const s = samples[((index % SAMPLE_COUNT) + SAMPLE_COUNT) % SAMPLE_COUNT]!;
   return { x: s.pos.x, y: s.pos.y, z: s.pos.z, yaw: yawAt(index) };
 }
 
@@ -232,7 +232,7 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
     if (g) {
       g.position.set(s.x, s.y, s.z);
       g.rotation.set(0, s.yaw, 0);
-      g.userData.speed = Math.hypot(s.vx, s.vz);
+      g.userData['speed'] = Math.hypot(s.vx, s.vz);
     }
     if (leanRef.current) {
       const speed = Math.hypot(s.vx, s.vz);
