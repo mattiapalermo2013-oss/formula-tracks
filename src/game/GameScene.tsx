@@ -5,6 +5,8 @@ import * as THREE from "three";
 import { TrackMesh } from "./TrackMesh";
 import { Car } from "./Car";
 import { ChaseCamera } from "./ChaseCamera";
+import { EditorCamera } from "./EditorCamera";
+import { useRaceStore } from "./store";
 
 function Ground() {
   return (
@@ -35,6 +37,7 @@ function Ground() {
 
 export function GameScene() {
   const carRef = useRef<THREE.Group>(null);
+  const editing = useRaceStore((s) => s.phase === "editing");
 
   return (
     <Canvas
@@ -75,7 +78,7 @@ export function GameScene() {
       <Suspense fallback={null}>
         <Car groupRef={carRef} />
       </Suspense>
-      <ChaseCamera targetRef={carRef} />
+      {editing ? <EditorCamera /> : <ChaseCamera targetRef={carRef} />}
     </Canvas>
   );
 }

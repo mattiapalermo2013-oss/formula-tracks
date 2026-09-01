@@ -2,14 +2,8 @@ import { useEffect, useMemo, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
-import {
-  CHECKPOINT_INDICES,
-  LAPS_TO_WIN,
-  SAMPLE_COUNT,
-  samples,
-  trackQuery,
-  yawAt,
-} from "./track";
+import { LAPS_TO_WIN, trackQuery, yawAt, type Track } from "./track";
+import { useTrackStore } from "./trackStore";
 import { useKeyboard } from "./useKeyboard";
 import { useRaceStore } from "./store";
 
@@ -33,22 +27,21 @@ interface VehicleState {
   grounded: boolean;
   trackIdx: number;
   lap: number;
-  checkpoint: number; // next checkpoint to hit (index into CHECKPOINT_INDICES)
+  checkpoint: number;
   lapStart: number;
   elapsed: number;
   started: boolean;
 }
 
-function spawnAt(index: number): Pick<VehicleState, "x" | "y" | "z" | "yaw"> {
-  const s = samples[((index % SAMPLE_COUNT) + SAMPLE_COUNT) % SAMPLE_COUNT]!;
-  return { x: s.pos.x, y: s.pos.y, z: s.pos.z, yaw: yawAt(index) };
+function spawnAt(track: Track, index: number): Pick<VehicleState, "x" | "y" | "z" | "yaw"> {
+  const s = track.samples[((index % track.count) + track.count) % track.count]!;
+  return { x: s.pos.x, y: s.pos.y, z: s.pos.z, yaw: yawAt(track, index) };
 }
 
 export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null> }) {
   const { scene } = useGLTF("/models/race.glb");
   const model = useMemo(() => {
     const clone = scene.clone(true);
-    // Normalize: Kenney cars are ~2 units; scale to a readable size and center.
     const box = new THREE.Box3().setFromObject(clone);
     const size = box.getSize(new THREE.Vector3());
     const scale = 3.6 / Math.max(size.x, size.z);
@@ -56,20 +49,21 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
     const box2 = new THREE.Box3().setFromObject(clone);
     const center = box2.getCenter(new THREE.Vector3());
     clone.position.sub(center);
-    clone.position.y -= box2.min.y - center.y; // wheels on y=0 of the group
+    clone.position.y -= box2.min.y - center.y;
     clone.traverse((o) => {
-      if ((o as THREE.Mesh).isMesh) {
-        (o as THREE.Mesh).castShadow = true;
-      }
+      if ((o as THREE.Mesh).isMesh) (o as THREE.Mesh).castShadow = true;
     });
     return clone;
   }, [scene]);
 
   const leanRef = useRef<THREE.Group>(null);
   const keys = useKeyboard();
+  const track = useTrackStore((s) => s.track);
+  const trackRef = useRef(track);
+  trackRef.current = track;
 
   const v = useRef<VehicleState>({
-    ...spawnAt(2),
+    ...spawnAt(track, 2),
     vx: 0,
     vz: 0,
     vy: 0,
@@ -84,33 +78,24 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
   const lastResetKey = useRef(false);
   const lastStoreSync = useRef(0);
 
-  // Respawn when the race restarts.
   const phase = useRaceStore((s) => s.phase);
   useEffect(() => {
-    if (phase === "racing") {
-      const s = v.current;
-      Object.assign(s, spawnAt(2), {
-        vx: 0, vz: 0, vy: 0, grounded: true, trackIdx: 2,
-        lap: 1, checkpoint: 0, lapStart: 0, elapsed: 0, started: true,
-      });
-    }
-    if (phase === "ready") {
-      const s = v.current;
-      Object.assign(s, spawnAt(2), {
-        vx: 0, vz: 0, vy: 0, grounded: true, trackIdx: 2,
-        lap: 1, checkpoint: 0, lapStart: 0, elapsed: 0, started: false,
-      });
-    }
-  }, [phase]);
+    const s = v.current;
+    Object.assign(s, spawnAt(track, 2), {
+      vx: 0, vz: 0, vy: 0, grounded: true, trackIdx: 2,
+      lap: 1, checkpoint: 0, lapStart: 0, elapsed: 0,
+      started: phase === "racing",
+    });
+  }, [phase, track]);
 
   useFrame((_, rawDelta) => {
     const dt = Math.min(rawDelta, 0.05);
     const s = v.current;
+    const trk = trackRef.current;
     const store = useRaceStore.getState();
     const k = keys.current;
     const racing = store.phase === "racing";
 
-    // --- input
     const forward = racing
       ? (k.has("KeyW") || k.has("ArrowUp") ? 1 : 0) - (k.has("KeyS") || k.has("ArrowDown") ? 1 : 0)
       : 0;
@@ -120,17 +105,16 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
     const braking = racing && k.has("Space");
     const resetPressed = k.has("KeyR");
 
-    // --- reset to last checkpoint
     if (resetPressed && !lastResetKey.current && racing) {
-      const cpIndex =
-        s.checkpoint === 0 ? 0 : (CHECKPOINT_INDICES[s.checkpoint - 1] ?? 0);
-      Object.assign(s, spawnAt(cpIndex + 1), { vx: 0, vz: 0, vy: 0, grounded: true, trackIdx: cpIndex + 1 });
+      const cpIndex = s.checkpoint === 0 ? 0 : (trk.checkpoints[s.checkpoint - 1] ?? 0);
+      Object.assign(s, spawnAt(trk, cpIndex + 1), {
+        vx: 0, vz: 0, vy: 0, grounded: true, trackIdx: cpIndex + 1,
+      });
     }
     lastResetKey.current = resetPressed;
 
     if (racing) s.elapsed += dt;
 
-    // --- arcade vehicle model (longitudinal / lateral decomposition)
     const fdx = Math.sin(s.yaw);
     const fdz = Math.cos(s.yaw);
     const rdx = Math.cos(s.yaw);
@@ -161,13 +145,11 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
     s.x += s.vx * dt;
     s.z += s.vz * dt;
 
-    // --- track collision + ground height
-    const hit = trackQuery(s.x, s.z, s.trackIdx);
+    const hit = trackQuery(trk, s.x, s.z, s.trackIdx);
     s.trackIdx = hit.index;
     if (hit.offTrack) {
       s.x += hit.pushX;
       s.z += hit.pushZ;
-      // scrape: kill the velocity component pushing into the barrier
       const pushLen = Math.hypot(hit.pushX, hit.pushZ) || 1;
       const nx = hit.pushX / pushLen;
       const nz = hit.pushZ / pushLen;
@@ -180,11 +162,9 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
       }
     }
 
-    // --- vertical: follow the road, launch off crests, gravity in the air
     if (s.grounded) {
       const climbRate = (hit.groundY - s.y) / Math.max(dt, 1e-4);
       if (hit.groundY < s.y - 0.25 && vLong > 6) {
-        // ground fell away under a fast car — airborne, keep climb momentum
         s.grounded = false;
         s.vy = Math.max(climbRate, 0) * 0.9;
       } else {
@@ -202,18 +182,16 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
       }
     }
 
-    // --- checkpoints & laps
     if (racing) {
-      const nextCp = CHECKPOINT_INDICES[s.checkpoint];
+      const nextCp = trk.checkpoints[s.checkpoint];
       if (nextCp !== undefined) {
-        const prev = (s.trackIdx - 3 + SAMPLE_COUNT) % SAMPLE_COUNT;
+        const prev = (s.trackIdx - 3 + trk.count) % trk.count;
         const crossed =
           (prev < nextCp && s.trackIdx >= nextCp) ||
-          (nextCp < 20 && s.trackIdx >= nextCp && prev > SAMPLE_COUNT - 20);
+          (nextCp < 20 && s.trackIdx >= nextCp && prev > trk.count - 20);
         if (crossed) s.checkpoint += 1;
       }
-      // lap line at index 0: wrapped from the end back to the start
-      if (s.trackIdx < 20 && s.checkpoint >= CHECKPOINT_INDICES.length) {
+      if (s.trackIdx < 20 && s.checkpoint >= trk.checkpoints.length) {
         const lapTime = s.elapsed - s.lapStart;
         store.completeLap(lapTime);
         s.lapStart = s.elapsed;
@@ -227,7 +205,6 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
       store.setProgress(s.lap, s.checkpoint);
     }
 
-    // --- write to scene graph
     const g = groupRef.current;
     if (g) {
       g.position.set(s.x, s.y, s.z);
@@ -244,7 +221,6 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
       leanRef.current.rotation.x += (targetPitch - leanRef.current.rotation.x) * (1 - Math.exp(-4 * dt));
     }
 
-    // --- HUD sync (10 Hz is plenty)
     if (s.elapsed - lastStoreSync.current > 0.1 || !racing) {
       lastStoreSync.current = s.elapsed;
       store.setTelemetry(Math.round(Math.hypot(s.vx, s.vz) * 3.6), s.elapsed);

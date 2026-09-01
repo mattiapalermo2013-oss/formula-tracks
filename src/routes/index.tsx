@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { GameScene } from "../game/GameScene";
 import { Hud } from "../game/Hud";
+import { Editor } from "../game/Editor";
 
 export const Route = createFileRoute("/")({
   ssr: false, // the WebGL canvas must never render on the server
@@ -30,6 +31,7 @@ function RacePage() {
       <h1 className="sr-only">Poly Rush — gioco di corse 3D low-poly</h1>
       <GameScene />
       <Hud />
+      <Editor />
     </main>
   );
 }

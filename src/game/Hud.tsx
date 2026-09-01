@@ -18,12 +18,12 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
 }
 
 export function Hud() {
-  const { phase, lap, checkpoint, speed, elapsed, lastLap, bestLap, raceTime, startRace, reset } =
+  const { phase, lap, checkpoint, speed, elapsed, lastLap, bestLap, raceTime, startRace, reset, openEditor } =
     useRaceStore();
 
   return (
     <div className="pointer-events-none fixed inset-0 z-10 select-none">
-      {phase !== "ready" && (
+      {(phase === "racing" || phase === "finished") && (
         <>
           <div className="absolute left-4 top-4 flex gap-5 rounded-xl border border-border/40 bg-card/80 px-5 py-3 backdrop-blur-md">
             <Stat label="Giro" value={`${Math.min(lap, LAPS_TO_WIN)}/${LAPS_TO_WIN}`} />
@@ -76,6 +76,12 @@ export function Hud() {
           >
             Vai in pista
           </button>
+          <button
+            className="pointer-events-auto mt-3 rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
+            onClick={openEditor}
+          >
+            Costruisci la pista
+          </button>
           <div className="mt-8 flex flex-wrap justify-center gap-2 text-xs text-muted-foreground">
             {[
               ["W / ↑", "accelera"],
@@ -107,6 +113,12 @@ export function Hud() {
               onClick={reset}
             >
               Riprova
+            </button>
+            <button
+              className="pointer-events-auto mt-3 block w-full rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
+              onClick={openEditor}
+            >
+              Modifica pista
             </button>
           </div>
         </div>
