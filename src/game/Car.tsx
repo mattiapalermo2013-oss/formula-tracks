@@ -129,7 +129,7 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
       vLong -= vLong * DRAG * dt;
       vLong = THREE.MathUtils.clamp(vLong, -8, MAX_SPEED);
 
-      const speedFactor = Math.min(Math.abs(vLong) / 9, 1);
+      const speedFactor = Math.min(Math.abs(vLong) / 12, 1) * (1 - 0.55 * Math.min(Math.abs(vLong) / MAX_SPEED, 1));
       s.yaw += steer * TURN * speedFactor * (braking ? 1.4 : 1) * dt * Math.sign(vLong || 1);
 
       vLat *= Math.exp(-(braking ? 1.6 : GRIP) * dt);
