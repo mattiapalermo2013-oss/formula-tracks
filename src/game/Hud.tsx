@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { LAPS_TO_WIN, formatTime, useRaceStore } from "./store";
 
 function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
@@ -20,6 +21,15 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
 export function Hud() {
   const { phase, lap, checkpoint, speed, elapsed, lastLap, bestLap, raceTime, startRace, reset, openEditor } =
     useRaceStore();
+
+  useEffect(() => {
+    if (phase !== "racing") return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") useRaceStore.getState().reset();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [phase]);
 
   return (
     <div className="pointer-events-none fixed inset-0 z-10 select-none">
@@ -50,6 +60,15 @@ export function Hud() {
               />
             ))}
           </div>
+
+          {phase === "racing" && (
+            <button
+              className="pointer-events-auto absolute right-4 top-4 rounded-full border border-border/60 bg-card/80 px-5 py-2 text-xs font-bold uppercase tracking-widest text-foreground backdrop-blur-md transition-colors hover:bg-foreground/10"
+              onClick={reset}
+            >
+              Menu <span className="font-mono text-foreground/50">[Esc]</span>
+            </button>
+          )}
 
           {lastLap !== null && phase === "racing" && (
             <div className="absolute left-1/2 top-6 -translate-x-1/2 rounded-full border border-border/40 bg-card/80 px-5 py-2 font-mono text-sm text-foreground backdrop-blur-md">
@@ -89,6 +108,7 @@ export function Hud() {
               ["A D / ← →", "sterza"],
               ["Spazio", "derapata"],
               ["R", "reset"],
+              ["Esc", "menu"],
             ].map(([k, d]) => (
               <span key={k} className="rounded-md border border-border/50 bg-card/70 px-3 py-1.5">
                 <b className="font-mono text-foreground">{k}</b> · {d}
