@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { LAPS_TO_WIN } from "./track";
 
-export type RacePhase = "ready" | "racing" | "finished";
+export type RacePhase = "ready" | "editing" | "racing" | "finished";
 
 const BEST_KEY = "polyrush-best-lap";
 
