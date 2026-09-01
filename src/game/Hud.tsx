@@ -108,6 +108,7 @@ export function Hud() {
               ["A D / ← →", "sterza"],
               ["Spazio", "derapata"],
               ["R", "reset"],
+              ["Esc", "menu"],
             ].map(([k, d]) => (
               <span key={k} className="rounded-md border border-border/50 bg-card/70 px-3 py-1.5">
                 <b className="font-mono text-foreground">{k}</b> · {d}
