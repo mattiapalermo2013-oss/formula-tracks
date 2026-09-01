@@ -28,7 +28,7 @@ export function ChaseCamera({ targetRef }: { targetRef: RefObject<THREE.Group | 
     // speed-based FOV kick
     const speed = target.userData['speed'] ?? 0;
     const pc = camera as THREE.PerspectiveCamera;
-    const targetFov = 62 + Math.min(speed / 34, 1) * 14;
+    const targetFov = 62 + Math.min(speed / 83.3, 1) * 18;
     pc.fov += (targetFov - pc.fov) * (1 - Math.exp(-3 * delta));
     pc.updateProjectionMatrix();
   });
