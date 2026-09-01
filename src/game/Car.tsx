@@ -123,7 +123,7 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
     // --- reset to last checkpoint
     if (resetPressed && !lastResetKey.current && racing) {
       const cpIndex =
-        s.checkpoint === 0 ? 0 : CHECKPOINT_INDICES[s.checkpoint - 1];
+        s.checkpoint === 0 ? 0 : (CHECKPOINT_INDICES[s.checkpoint - 1] ?? 0);
       Object.assign(s, spawnAt(cpIndex + 1), { vx: 0, vz: 0, vy: 0, grounded: true, trackIdx: cpIndex + 1 });
     }
     lastResetKey.current = resetPressed;
