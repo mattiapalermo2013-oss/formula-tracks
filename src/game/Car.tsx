@@ -8,13 +8,13 @@ import { useKeyboard } from "./useKeyboard";
 import { useRaceStore } from "./store";
 
 // Feel constants — tune these, not the model.
-const ACCEL = 22;
+const ACCEL = 34;
 const BRAKE = 26;
-const DRAG = 0.9;
-const TURN = 2.2;
+const DRAG = 0.25;
+const TURN = 1.3;
 const GRIP = 7.0;
 const GRAVITY = -26;
-const MAX_SPEED = 34;
+const MAX_SPEED = 83.3; // ~300 km/h
 
 interface VehicleState {
   x: number;
@@ -129,7 +129,7 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
       vLong -= vLong * DRAG * dt;
       vLong = THREE.MathUtils.clamp(vLong, -8, MAX_SPEED);
 
-      const speedFactor = Math.min(Math.abs(vLong) / 9, 1);
+      const speedFactor = Math.min(Math.abs(vLong) / 12, 1) * (1 - 0.55 * Math.min(Math.abs(vLong) / MAX_SPEED, 1));
       s.yaw += steer * TURN * speedFactor * (braking ? 1.4 : 1) * dt * Math.sign(vLong || 1);
 
       vLat *= Math.exp(-(braking ? 1.6 : GRIP) * dt);
