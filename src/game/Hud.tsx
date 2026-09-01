@@ -23,7 +23,7 @@ export function Hud() {
 
   return (
     <div className="pointer-events-none fixed inset-0 z-10 select-none">
-      {phase !== "ready" && (
+      {(phase === "racing" || phase === "finished") && (
         <>
           <div className="absolute left-4 top-4 flex gap-5 rounded-xl border border-border/40 bg-card/80 px-5 py-3 backdrop-blur-md">
             <Stat label="Giro" value={`${Math.min(lap, LAPS_TO_WIN)}/${LAPS_TO_WIN}`} />
