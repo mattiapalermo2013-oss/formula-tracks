@@ -1,24 +1,35 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { GameScene } from "../game/GameScene";
+import { Hud } from "../game/Hud";
 
-// No head() here: the home route inherits title/description/og/twitter from
-// __root.tsx, and ships no og:image so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
 export const Route = createFileRoute("/")({
-  component: Index,
+  ssr: false, // the WebGL canvas must never render on the server
+  head: () => ({
+    meta: [
+      { title: "Poly Rush — Gioco di corse 3D low-poly nel browser" },
+      {
+        name: "description",
+        content:
+          "Guida una monoposto low-poly su un circuito sospeso: tre giri, rampe, derapate e cronometro. Gioca gratis nel browser, senza download.",
+      },
+      { property: "og:title", content: "Poly Rush — Gioco di corse 3D low-poly" },
+      {
+        property: "og:description",
+        content: "Circuito sospeso, curve strette e cronometro: batti il tuo miglior giro.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+  component: RacePage,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
+function RacePage() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <main className="fixed inset-0 overflow-hidden bg-background">
+      <h1 className="sr-only">Poly Rush — gioco di corse 3D low-poly</h1>
+      <GameScene />
+      <Hud />
+    </main>
   );
 }
