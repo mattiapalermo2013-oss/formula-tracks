@@ -62,7 +62,7 @@ export const CHECKPOINT_INDICES = [
 ];
 
 export function yawAt(index: number): number {
-  const t = samples[((index % SAMPLE_COUNT) + SAMPLE_COUNT) % SAMPLE_COUNT].tangent;
+  const t = samples[((index % SAMPLE_COUNT) + SAMPLE_COUNT) % SAMPLE_COUNT]!.tangent;
   return Math.atan2(t.x, t.z);
 }
 
@@ -83,15 +83,15 @@ export function trackQuery(px: number, pz: number, prevIndex: number): TrackHit 
   let bestDist = Infinity;
   for (let k = -6; k <= 16; k++) {
     const j = (((prevIndex + k) % n) + n) % n;
-    const dx = px - samples[j].pos.x;
-    const dz = pz - samples[j].pos.z;
+    const dx = px - samples[j]!.pos.x;
+    const dz = pz - samples[j]!.pos.z;
     const d = dx * dx + dz * dz;
     if (d < bestDist) {
       bestDist = d;
       best = j;
     }
   }
-  const s = samples[best];
+  const s = samples[best]!;
   const r = s.right;
   const lat = (px - s.pos.x) * r.x + (pz - s.pos.z) * r.y;
   const limit = HALF_WIDTH - 1.2;
@@ -127,8 +127,8 @@ export function seededRandom(seed: number) {
 export function distanceToTrack(px: number, pz: number): number {
   let best = Infinity;
   for (let i = 0; i < SAMPLE_COUNT; i += 4) {
-    const dx = px - samples[i].pos.x;
-    const dz = pz - samples[i].pos.z;
+    const dx = px - samples[i]!.pos.x;
+    const dz = pz - samples[i]!.pos.z;
     const d = dx * dx + dz * dz;
     if (d < best) best = d;
   }

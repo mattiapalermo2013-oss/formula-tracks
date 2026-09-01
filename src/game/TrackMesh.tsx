@@ -9,7 +9,7 @@ function buildRibbon(halfWidth: number, yOffset: number) {
   const indices: number[] = [];
 
   for (let i = 0; i < n; i++) {
-    const s = samples[i];
+    const s = samples[i]!;
     const rx = s.right.x * halfWidth;
     const rz = s.right.y * halfWidth;
     positions[i * 6 + 0] = s.pos.x - rx;
@@ -37,7 +37,7 @@ function buildCurbs(offsetSign: number, phase: number) {
   const dummy = new THREE.Object3D();
   const out: THREE.Matrix4[] = [];
   for (let i = phase; i < SAMPLE_COUNT; i += 8) {
-    const s = samples[i];
+    const s = samples[i]!;
     dummy.position.set(
       s.pos.x + s.right.x * HALF_WIDTH * offsetSign,
       s.pos.y + 0.12,
@@ -74,7 +74,7 @@ function Pillars() {
   const items = useMemo(() => {
     const out: { x: number; z: number; h: number; y: number }[] = [];
     for (let i = 0; i < SAMPLE_COUNT; i += 12) {
-      const s = samples[i];
+      const s = samples[i]!;
       if (s.pos.y > 0.8) out.push({ x: s.pos.x, z: s.pos.z, h: s.pos.y, y: s.pos.y / 2 });
     }
     return out;
@@ -133,7 +133,7 @@ function Scenery() {
 }
 
 function StartLine() {
-  const s = samples[0];
+  const s = samples[0]!;
   const yaw = Math.atan2(s.tangent.x, s.tangent.z);
   return (
     <group position={[s.pos.x, s.pos.y, s.pos.z]} rotation={[0, yaw, 0]}>
