@@ -21,6 +21,7 @@ interface RaceStore {
   bestLap: number | null;
   raceTime: number | null; // final total when finished
   startRace: () => void;
+  openEditor: () => void;
   setTelemetry: (speed: number, elapsed: number) => void;
   setProgress: (lap: number, checkpoint: number) => void;
   completeLap: (lapTime: number) => void;
@@ -37,6 +38,7 @@ export const useRaceStore = create<RaceStore>((set, get) => ({
   lastLap: null,
   bestLap: loadBest(),
   raceTime: null,
+  openEditor: () => set({ phase: "editing", lap: 1, checkpoint: 0, elapsed: 0, speed: 0, raceTime: null, lastLap: null }),
   startRace: () => set({ phase: "racing", lap: 1, checkpoint: 0, elapsed: 0, raceTime: null, lastLap: null }),
   setTelemetry: (speed, elapsed) => set({ speed, elapsed }),
   setProgress: (lap, checkpoint) => {
