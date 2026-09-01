@@ -21,6 +21,15 @@ export function Hud() {
   const { phase, lap, checkpoint, speed, elapsed, lastLap, bestLap, raceTime, startRace, reset, openEditor } =
     useRaceStore();
 
+  useEffect(() => {
+    if (phase !== "racing") return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") useRaceStore.getState().reset();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [phase]);
+
   return (
     <div className="pointer-events-none fixed inset-0 z-10 select-none">
       {(phase === "racing" || phase === "finished") && (
