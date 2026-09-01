@@ -10,11 +10,11 @@ import { useRaceStore } from "./store";
 // Feel constants — tune these, not the model.
 const ACCEL = 34;
 const BRAKE = 26;
-const DRAG = 0.9;
-const TURN = 2.2;
+const DRAG = 0.25;
+const TURN = 1.3;
 const GRIP = 7.0;
 const GRAVITY = -26;
-const MAX_SPEED = 34;
+const MAX_SPEED = 83.3; // ~300 km/h
 
 interface VehicleState {
   x: number;
