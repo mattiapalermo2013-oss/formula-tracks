@@ -78,7 +78,7 @@ function LiveryPanel({ onClose }: { onClose: () => void }) {
   const { body, accent, pattern, number, setBody, setAccent, setPattern, setNumber } =
     useLiveryStore();
   return (
-    <div className="pointer-events-auto mt-6 w-full max-w-md rounded-2xl border border-border/50 bg-card/90 p-6 backdrop-blur-md">
+    <div className="pointer-events-auto mt-6 w-full max-w-md overflow-y-auto overscroll-contain rounded-2xl border border-border/50 bg-card/90 p-6 backdrop-blur-md" style={{ maxHeight: "min(70vh, 640px)" }}>
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-sm font-bold uppercase tracking-[0.25em] text-foreground">
           Officina
@@ -212,7 +212,8 @@ export function Hud() {
       )}
 
       {phase === "ready" && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/70 backdrop-blur-sm">
+        <div className="pointer-events-auto absolute inset-0 flex flex-col items-center overflow-y-auto bg-background/70 py-6 backdrop-blur-sm">
+          <div className="my-auto flex flex-col items-center">
           <p className="text-xs font-semibold uppercase tracking-[0.45em] text-primary">
             Arcade racing
           </p>
@@ -256,6 +257,7 @@ export function Hud() {
                 <b className="font-mono text-foreground">{k}</b> · {d}
               </span>
             ))}
+          </div>
           </div>
         </div>
       )}
