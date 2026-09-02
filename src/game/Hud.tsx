@@ -90,6 +90,7 @@ function LiveryPanel({ onClose }: { onClose: () => void }) {
           Chiudi
         </button>
       </div>
+      <CarPreview />
       <p className="mb-2 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-foreground/50">
         Carrozzeria
       </p>
