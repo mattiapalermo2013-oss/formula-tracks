@@ -126,7 +126,7 @@ export function CarModel() {
         const wbb = new THREE.Box3().setFromObject(bm);
         const wSize = wbb.getSize(new THREE.Vector3());
         const wCenter = wbb.getCenter(new THREE.Vector3());
-        const w = wSize.y * 0.55;
+        const w = wSize.y * 0.48;
         const ray = new THREE.Raycaster();
         const yW = wbb.min.y + wSize.y * 0.42;
         for (const dir of [1, -1]) {
@@ -139,7 +139,7 @@ export function CarModel() {
           const hit = ray.intersectObject(bm, false)[0];
           if (hit) {
             const local = bm.worldToLocal(
-              hit.point.clone().add(new THREE.Vector3(dir * 0.03, 0, 0)),
+              hit.point.clone().add(new THREE.Vector3(dir * 0.14, 0, 0)),
             );
             plane.position.copy(local);
           } else {
