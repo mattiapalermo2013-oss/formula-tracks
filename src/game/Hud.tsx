@@ -1,5 +1,102 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { LAPS_TO_WIN, formatTime, useRaceStore } from "./store";
+import {
+  ACCENT_COLORS,
+  BODY_COLORS,
+  useLiveryStore,
+  type LiveryPattern,
+} from "./liveryStore";
+
+const PATTERNS: { id: LiveryPattern; label: string }[] = [
+  { id: "solid", label: "Tinta unita" },
+  { id: "stripes", label: "Strisce" },
+  { id: "rally", label: "Rally" },
+  { id: "split", label: "Bicolore" },
+];
+
+function Swatches({
+  colors,
+  value,
+  onPick,
+}: {
+  colors: string[];
+  value: string;
+  onPick: (c: string) => void;
+}) {
+  return (
+    <div className="flex flex-wrap justify-center gap-2">
+      {colors.map((c) => (
+        <button
+          key={c}
+          aria-label={c}
+          onClick={() => onPick(c)}
+          className={`h-8 w-8 rounded-full border-2 transition-transform hover:scale-110 ${
+            value === c ? "border-foreground scale-110" : "border-border/50"
+          }`}
+          style={{ backgroundColor: c }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function LiveryPanel({ onClose }: { onClose: () => void }) {
+  const { body, accent, pattern, number, setBody, setAccent, setPattern, setNumber } =
+    useLiveryStore();
+  return (
+    <div className="pointer-events-auto mt-6 w-full max-w-md rounded-2xl border border-border/50 bg-card/90 p-6 backdrop-blur-md">
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-sm font-bold uppercase tracking-[0.25em] text-foreground">
+          Officina
+        </h2>
+        <button
+          onClick={onClose}
+          className="rounded-full border border-border/60 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
+        >
+          Chiudi
+        </button>
+      </div>
+      <p className="mb-2 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-foreground/50">
+        Carrozzeria
+      </p>
+      <Swatches colors={BODY_COLORS} value={body} onPick={setBody} />
+      <p className="mb-2 mt-4 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-foreground/50">
+        Accento
+      </p>
+      <Swatches colors={ACCENT_COLORS} value={accent} onPick={setAccent} />
+      <p className="mb-2 mt-4 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-foreground/50">
+        Livrea
+      </p>
+      <div className="flex flex-wrap justify-center gap-2">
+        {PATTERNS.map((p) => (
+          <button
+            key={p.id}
+            onClick={() => setPattern(p.id)}
+            className={`rounded-full border px-4 py-2 text-xs font-bold uppercase tracking-widest transition-colors ${
+              pattern === p.id
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border/60 text-foreground hover:bg-foreground/10"
+            }`}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
+      <p className="mb-2 mt-4 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-foreground/50">
+        Numero di gara
+      </p>
+      <div className="flex justify-center">
+        <input
+          value={number}
+          onChange={(e) => setNumber(e.target.value)}
+          inputMode="numeric"
+          placeholder="0-99"
+          className="w-24 rounded-lg border border-border/60 bg-background px-3 py-2 text-center font-mono text-xl font-bold text-foreground outline-none focus:border-primary"
+        />
+      </div>
+    </div>
+  );
+}
 
 function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
@@ -21,6 +118,7 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
 export function Hud() {
   const { phase, lap, checkpoint, speed, elapsed, lastLap, bestLap, raceTime, startRace, reset, openEditor } =
     useRaceStore();
+  const [showLivery, setShowLivery] = useState(false);
 
   useEffect(() => {
     if (phase !== "racing") return;
@@ -95,12 +193,21 @@ export function Hud() {
           >
             Vai in pista
           </button>
-          <button
-            className="pointer-events-auto mt-3 rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
-            onClick={openEditor}
-          >
-            Costruisci la pista
-          </button>
+          <div className="mt-3 flex gap-3">
+            <button
+              className="pointer-events-auto rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
+              onClick={openEditor}
+            >
+              Costruisci la pista
+            </button>
+            <button
+              className="pointer-events-auto rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
+              onClick={() => setShowLivery((v) => !v)}
+            >
+              Personalizza auto
+            </button>
+          </div>
+          {showLivery && <LiveryPanel onClose={() => setShowLivery(false)} />}
           <div className="mt-8 flex flex-wrap justify-center gap-2 text-xs text-muted-foreground">
             {[
               ["W / ↑", "accelera"],

@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import { LAPS_TO_WIN, trackQuery, yawAt, type Track } from "./track";
 import { useTrackStore } from "./trackStore";
 import { useKeyboard } from "./useKeyboard";
 import { useRaceStore } from "./store";
+import { CarModel } from "./CarModel";
 
 // Feel constants — tune these, not the model.
 const ACCEL = 34;
@@ -39,22 +39,6 @@ function spawnAt(track: Track, index: number): Pick<VehicleState, "x" | "y" | "z
 }
 
 export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null> }) {
-  const { scene } = useGLTF("/models/race.glb");
-  const model = useMemo(() => {
-    const clone = scene.clone(true);
-    const box = new THREE.Box3().setFromObject(clone);
-    const size = box.getSize(new THREE.Vector3());
-    const scale = 3.6 / Math.max(size.x, size.z);
-    clone.scale.setScalar(scale);
-    const box2 = new THREE.Box3().setFromObject(clone);
-    const center = box2.getCenter(new THREE.Vector3());
-    clone.position.sub(center);
-    clone.position.y -= box2.min.y - center.y;
-    clone.traverse((o) => {
-      if ((o as THREE.Mesh).isMesh) (o as THREE.Mesh).castShadow = true;
-    });
-    return clone;
-  }, [scene]);
 
   const leanRef = useRef<THREE.Group>(null);
   const keys = useKeyboard();
@@ -230,10 +214,8 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
   return (
     <group ref={groupRef}>
       <group ref={leanRef}>
-        <primitive object={model} />
+        <CarModel />
       </group>
     </group>
   );
 }
-
-useGLTF.preload("/models/race.glb");
