@@ -118,15 +118,33 @@ export function CarModel() {
         bm.add(overlay);
       }
 
-      // number roundels on both sides
+      // number roundels on both sides, flush with the bodywork
       if (number) {
         const tex = numberTexture(number, accent, body);
         const planeMat = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
-        const w = half.y * 1.1;
+        root.updateMatrixWorld(true);
+        const wbb = new THREE.Box3().setFromObject(bm);
+        const wSize = wbb.getSize(new THREE.Vector3());
+        const wCenter = wbb.getCenter(new THREE.Vector3());
+        const w = wSize.y * 0.48;
+        const ray = new THREE.Raycaster();
+        const yW = wbb.min.y + wSize.y * 0.42;
         for (const dir of [1, -1]) {
           const plane = new THREE.Mesh(new THREE.PlaneGeometry(w, w), planeMat);
-          plane.position.set(dir * (half.x * 1.02), half.y * 0.6, -half.z * 0.05);
           plane.rotation.y = dir * (Math.PI / 2);
+          ray.set(
+            new THREE.Vector3(wCenter.x + dir * wSize.x, yW, wCenter.z),
+            new THREE.Vector3(-dir, 0, 0),
+          );
+          const hit = ray.intersectObject(bm, false)[0];
+          if (hit) {
+            const local = bm.worldToLocal(
+              hit.point.clone().add(new THREE.Vector3(dir * 0.14, 0, 0)),
+            );
+            plane.position.copy(local);
+          } else {
+            plane.position.set(dir * half.x * 0.98, half.y * 0.45, 0);
+          }
           bm.add(plane);
         }
       }
