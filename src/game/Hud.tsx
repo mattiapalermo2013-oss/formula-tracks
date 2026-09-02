@@ -118,6 +118,7 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
 export function Hud() {
   const { phase, lap, checkpoint, speed, elapsed, lastLap, bestLap, raceTime, startRace, reset, openEditor } =
     useRaceStore();
+  const [showLivery, setShowLivery] = useState(false);
 
   useEffect(() => {
     if (phase !== "racing") return;
