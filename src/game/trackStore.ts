@@ -22,6 +22,7 @@ function persist(pieces: PieceType[]) {
 interface TrackStore {
   pieces: PieceType[];
   track: Track;
+  setPieces: (p: PieceType[]) => void;
   add: (p: PieceType) => void;
   undo: () => void;
   clear: () => void;
