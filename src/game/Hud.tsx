@@ -1,11 +1,45 @@
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import * as THREE from "three";
 import { LAPS_TO_WIN, formatTime, useRaceStore } from "./store";
+import { CarModel } from "./CarModel";
 import {
   ACCENT_COLORS,
   BODY_COLORS,
   useLiveryStore,
   type LiveryPattern,
 } from "./liveryStore";
+
+function Turntable() {
+  const ref = useRef<THREE.Group>(null);
+  useFrame((_, delta) => {
+    if (ref.current) ref.current.rotation.y += delta * 0.7;
+  });
+  return (
+    <group ref={ref} position={[0, -0.6, 0]}>
+      <CarModel />
+    </group>
+  );
+}
+
+function CarPreview() {
+  return (
+    <div className="mb-4 h-44 overflow-hidden rounded-xl border border-border/50 bg-gradient-to-b from-sky-200/60 to-background">
+      <Canvas shadows dpr={[1, 1.5]} camera={{ position: [3.2, 1.8, 4.2], fov: 38 }}>
+        <ambientLight intensity={0.7} />
+        <directionalLight position={[4, 6, 3]} intensity={1.8} castShadow />
+        <hemisphereLight args={["#cfe9ff", "#4b7a45", 0.6]} />
+        <Suspense fallback={null}>
+          <Turntable />
+        </Suspense>
+        <mesh rotation-x={-Math.PI / 2} position={[0, -0.62, 0]} receiveShadow>
+          <circleGeometry args={[3.4, 40]} />
+          <meshStandardMaterial color="#3a3f4a" roughness={0.9} />
+        </mesh>
+      </Canvas>
+    </div>
+  );
+}
 
 const PATTERNS: { id: LiveryPattern; label: string }[] = [
   { id: "solid", label: "Tinta unita" },
@@ -56,6 +90,7 @@ function LiveryPanel({ onClose }: { onClose: () => void }) {
           Chiudi
         </button>
       </div>
+      <CarPreview />
       <p className="mb-2 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-foreground/50">
         Carrozzeria
       </p>
