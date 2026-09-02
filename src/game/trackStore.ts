@@ -34,6 +34,11 @@ const initial = loadPieces();
 export const useTrackStore = create<TrackStore>((set, get) => ({
   pieces: initial,
   track: buildTrack(initial),
+  setPieces: (pieces) => {
+    const safe = pieces.length ? pieces : ["straight" as PieceType];
+    persist(safe);
+    set({ pieces: safe, track: buildTrack(safe) });
+  },
   add: (p) => {
     const pieces = [...get().pieces, p];
     persist(pieces);
