@@ -214,10 +214,8 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
   return (
     <group ref={groupRef}>
       <group ref={leanRef}>
-        <primitive object={model} />
+        <CarModel />
       </group>
     </group>
   );
 }
-
-useGLTF.preload("/models/race.glb");
