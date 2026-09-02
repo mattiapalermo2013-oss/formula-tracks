@@ -138,7 +138,9 @@ export function CarModel() {
           );
           const hit = ray.intersectObject(bm, false)[0];
           if (hit) {
-            const local = bm.worldToLocal(hit.point.clone());
+            const local = bm.worldToLocal(
+              hit.point.clone().add(new THREE.Vector3(dir * 0.03, 0, 0)),
+            );
             plane.position.copy(local);
           } else {
             plane.position.set(dir * half.x * 0.98, half.y * 0.45, 0);
