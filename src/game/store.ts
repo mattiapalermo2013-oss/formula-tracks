@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import { LAPS_TO_WIN } from "./track";
+import { useTracksStore } from "./tracksStore";
+import { useBestTimesStore } from "./bestTimesStore";
 
 export type RacePhase = "ready" | "editing" | "racing" | "finished";
 
@@ -51,7 +53,11 @@ export const useRaceStore = create<RaceStore>((set, get) => ({
       if (typeof window !== "undefined") localStorage.setItem(BEST_KEY, String(bestLap));
       return { lastLap: lapTime, bestLap };
     }),
-  finishRace: (total) => set({ phase: "finished", raceTime: total }),
+  finishRace: (total) => {
+    set({ phase: "finished", raceTime: total });
+    const slot = useTracksStore.getState().selected;
+    if (slot != null) useBestTimesStore.getState().record(slot, total);
+  },
   reset: () =>
     set({
       phase: "ready",
