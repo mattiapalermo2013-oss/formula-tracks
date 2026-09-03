@@ -9,6 +9,8 @@ import {
   useLiveryStore,
   type LiveryPattern,
 } from "./liveryStore";
+import { useTracksStore } from "./tracksStore";
+import { TracksPanel } from "./TracksPanel";
 
 function Turntable() {
   const ref = useRef<THREE.Group>(null);
@@ -154,6 +156,15 @@ export function Hud() {
   const { phase, lap, checkpoint, speed, elapsed, lastLap, bestLap, raceTime, startRace, reset, openEditor } =
     useRaceStore();
   const [showLivery, setShowLivery] = useState(false);
+  const [showTracks, setShowTracks] = useState(false);
+  const fetchAll = useTracksStore((s) => s.fetchAll);
+  const refreshAuth = useTracksStore((s) => s.refreshAuth);
+  const isAdmin = useTracksStore((s) => s.isAdmin);
+
+  useEffect(() => {
+    void fetchAll();
+    void refreshAuth();
+  }, [fetchAll, refreshAuth]);
 
   useEffect(() => {
     if (phase !== "racing") return;
@@ -229,20 +240,35 @@ export function Hud() {
           >
             Vai in pista
           </button>
-          <div className="mt-3 flex gap-3">
+          <div className="mt-3 flex flex-wrap justify-center gap-3">
             <button
               className="pointer-events-auto rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
-              onClick={openEditor}
+              onClick={() => {
+                setShowLivery(false);
+                setShowTracks((v) => !v);
+              }}
             >
-              Costruisci la pista
+              Piste
             </button>
+            {isAdmin && (
+              <button
+                className="pointer-events-auto rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
+                onClick={openEditor}
+              >
+                Costruisci la pista
+              </button>
+            )}
             <button
               className="pointer-events-auto rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
-              onClick={() => setShowLivery((v) => !v)}
+              onClick={() => {
+                setShowTracks(false);
+                setShowLivery((v) => !v);
+              }}
             >
               Personalizza auto
             </button>
           </div>
+          {showTracks && <TracksPanel onClose={() => setShowTracks(false)} />}
           {showLivery && <LiveryPanel onClose={() => setShowLivery(false)} />}
           <div className="mt-8 flex flex-wrap justify-center gap-2 text-xs text-muted-foreground">
             {[
@@ -278,12 +304,14 @@ export function Hud() {
             >
               Riprova
             </button>
-            <button
-              className="pointer-events-auto mt-3 block w-full rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
-              onClick={openEditor}
-            >
-              Modifica pista
-            </button>
+            {isAdmin && (
+              <button
+                className="pointer-events-auto mt-3 block w-full rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
+                onClick={openEditor}
+              >
+                Modifica pista
+              </button>
+            )}
           </div>
         </div>
       )}
