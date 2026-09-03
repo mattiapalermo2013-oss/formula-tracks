@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import { LAPS_TO_WIN } from "./track";
+import { useTracksStore } from "./tracksStore";
+import { useBestTimesStore } from "./bestTimesStore";
 
 export type RacePhase = "ready" | "editing" | "racing" | "finished";
 
