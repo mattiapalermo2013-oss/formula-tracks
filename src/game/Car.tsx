@@ -31,6 +31,7 @@ interface VehicleState {
   lapStart: number;
   elapsed: number;
   started: boolean;
+  timerStarted: boolean;
 }
 
 function spawnAt(track: Track, index: number): Pick<VehicleState, "x" | "y" | "z" | "yaw"> {
@@ -58,6 +59,7 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
     lapStart: 0,
     elapsed: 0,
     started: false,
+    timerStarted: false,
   });
   const lastResetKey = useRef(false);
   const lastStoreSync = useRef(0);
@@ -69,6 +71,7 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
       vx: 0, vz: 0, vy: 0, grounded: true, trackIdx: 2,
       lap: 1, checkpoint: 0, lapStart: 0, elapsed: 0,
       started: phase === "racing",
+      timerStarted: false,
     });
   }, [phase, track]);
 
@@ -97,7 +100,9 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
     }
     lastResetKey.current = resetPressed;
 
-    if (racing) s.elapsed += dt;
+    // The clock starts on the first throttle input, not at phase change.
+    if (racing && !s.timerStarted && (forward > 0 || braking)) s.timerStarted = true;
+    if (racing && s.timerStarted) s.elapsed += dt;
 
     const fdx = Math.sin(s.yaw);
     const fdz = Math.cos(s.yaw);
@@ -184,6 +189,7 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
         Object.assign(s, spawnAt(trk, 2), {
           vx: 0, vz: 0, vy: 0, grounded: true, trackIdx: 2,
           lap: 1, checkpoint: 0, lapStart: 0, elapsed: 0,
+          timerStarted: false,
         });
       }
       store.setProgress(s.lap, s.checkpoint);
