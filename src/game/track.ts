@@ -7,7 +7,7 @@ import { buildPolyline, type PieceType } from "./blocks";
 // ---------------------------------------------------------------------------
 
 export const HALF_WIDTH = 6;
-export const LAPS_TO_WIN = 3;
+export const LAPS_TO_WIN = 1;
 
 export interface TrackSample {
   pos: THREE.Vector3;

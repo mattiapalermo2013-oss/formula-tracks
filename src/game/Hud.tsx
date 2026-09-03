@@ -1,7 +1,7 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { LAPS_TO_WIN, formatTime, useRaceStore } from "./store";
+import { formatTime, useRaceStore } from "./store";
 import { CarModel } from "./CarModel";
 import {
   ACCENT_COLORS,
@@ -153,7 +153,7 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
 }
 
 export function Hud() {
-  const { phase, lap, checkpoint, speed, elapsed, lastLap, bestLap, raceTime, startRace, reset, openEditor } =
+  const { phase, checkpoint, speed, elapsed, lastLap, bestLap, raceTime, startRace, reset, openEditor } =
     useRaceStore();
   const [showLivery, setShowLivery] = useState(false);
   const [showTracks, setShowTracks] = useState(false);
@@ -180,9 +180,8 @@ export function Hud() {
       {(phase === "racing" || phase === "finished") && (
         <>
           <div className="absolute left-4 top-4 flex gap-5 rounded-xl border border-border/40 bg-card/80 px-5 py-3 backdrop-blur-md">
-            <Stat label="Giro" value={`${Math.min(lap, LAPS_TO_WIN)}/${LAPS_TO_WIN}`} />
             <Stat label="Tempo" value={formatTime(elapsed)} />
-            <Stat label="Miglior giro" value={bestLap ? formatTime(bestLap) : "--:--"} accent />
+            <Stat label="Record" value={bestLap ? formatTime(bestLap) : "--:--"} accent />
           </div>
 
           <div className="absolute bottom-6 right-6 rounded-xl border border-border/40 bg-card/80 px-6 py-3 text-right backdrop-blur-md">
@@ -232,7 +231,7 @@ export function Hud() {
             POLY RUSH
           </h1>
           <p className="mt-3 max-w-md text-center text-sm text-muted-foreground">
-            Tre giri sul circuito sospeso. Curve strette, rampe e un cronometro che non perdona.
+            Un giro lanciato sul circuito sospeso. Curve strette, rampe e un cronometro che non perdona.
           </p>
           <button
             className="pointer-events-auto mt-8 rounded-full bg-primary px-10 py-4 text-base font-bold uppercase tracking-widest text-primary-foreground transition-transform hover:scale-105"
@@ -291,12 +290,12 @@ export function Hud() {
       {phase === "finished" && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/60 backdrop-blur-sm">
           <div className="rounded-2xl border border-border/50 bg-card/90 px-12 py-10 text-center">
-            <h2 className="text-4xl font-black tracking-tight text-foreground">TRAGUARDO</h2>
+            <h2 className="text-4xl font-black tracking-tight text-foreground">GIRO COMPLETATO</h2>
             <p className="mt-6 font-mono text-5xl font-bold tabular-nums text-primary">
               {raceTime !== null ? formatTime(raceTime) : "--"}
             </p>
             <p className="mt-2 text-sm text-muted-foreground">
-              Miglior giro {bestLap ? formatTime(bestLap) : "--"}
+              Record {bestLap ? formatTime(bestLap) : "--"}
             </p>
             <button
               className="pointer-events-auto mt-8 rounded-full bg-primary px-8 py-3 text-sm font-bold uppercase tracking-widest text-primary-foreground transition-transform hover:scale-105"

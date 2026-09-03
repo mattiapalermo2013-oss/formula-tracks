@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { LAPS_TO_WIN, trackQuery, yawAt, type Track } from "./track";
+import { trackQuery, yawAt, type Track } from "./track";
 import { useTrackStore } from "./trackStore";
 import { useKeyboard } from "./useKeyboard";
 import { useRaceStore } from "./store";
@@ -178,13 +178,13 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
       if (s.trackIdx < 20 && s.checkpoint >= trk.checkpoints.length) {
         const lapTime = s.elapsed - s.lapStart;
         store.completeLap(lapTime);
-        s.lapStart = s.elapsed;
         s.checkpoint = 0;
-        if (s.lap >= LAPS_TO_WIN) {
-          store.finishRace(s.elapsed, lapTime);
-        } else {
-          s.lap += 1;
-        }
+        store.finishRace(lapTime, lapTime);
+        // respawn stationary on the start line
+        Object.assign(s, spawnAt(trk, 2), {
+          vx: 0, vz: 0, vy: 0, grounded: true, trackIdx: 2,
+          lap: 1, checkpoint: 0, lapStart: 0, elapsed: 0,
+        });
       }
       store.setProgress(s.lap, s.checkpoint);
     }
