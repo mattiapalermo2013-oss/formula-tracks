@@ -299,9 +299,15 @@ export function Hud() {
             </p>
             <button
               className="pointer-events-auto mt-8 rounded-full bg-primary px-8 py-3 text-sm font-bold uppercase tracking-widest text-primary-foreground transition-transform hover:scale-105"
-              onClick={reset}
+              onClick={startRace}
             >
               Riprova
+            </button>
+            <button
+              className="pointer-events-auto mt-3 block w-full rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
+              onClick={reset}
+            >
+              Torna al menu
             </button>
             {isAdmin && (
               <button
