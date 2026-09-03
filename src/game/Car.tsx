@@ -31,6 +31,7 @@ interface VehicleState {
   lapStart: number;
   elapsed: number;
   started: boolean;
+  timerStarted: boolean;
 }
 
 function spawnAt(track: Track, index: number): Pick<VehicleState, "x" | "y" | "z" | "yaw"> {
@@ -58,6 +59,7 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
     lapStart: 0,
     elapsed: 0,
     started: false,
+    timerStarted: false,
   });
   const lastResetKey = useRef(false);
   const lastStoreSync = useRef(0);
