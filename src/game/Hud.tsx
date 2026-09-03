@@ -154,6 +154,15 @@ export function Hud() {
   const { phase, lap, checkpoint, speed, elapsed, lastLap, bestLap, raceTime, startRace, reset, openEditor } =
     useRaceStore();
   const [showLivery, setShowLivery] = useState(false);
+  const [showTracks, setShowTracks] = useState(false);
+  const fetchAll = useTracksStore((s) => s.fetchAll);
+  const refreshAuth = useTracksStore((s) => s.refreshAuth);
+  const isAdmin = useTracksStore((s) => s.isAdmin);
+
+  useEffect(() => {
+    void fetchAll();
+    void refreshAuth();
+  }, [fetchAll, refreshAuth]);
 
   useEffect(() => {
     if (phase !== "racing") return;
