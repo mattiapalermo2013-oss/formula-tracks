@@ -9,6 +9,8 @@ import {
   useLiveryStore,
   type LiveryPattern,
 } from "./liveryStore";
+import { useTracksStore } from "./tracksStore";
+import { TracksPanel } from "./TracksPanel";
 
 function Turntable() {
   const ref = useRef<THREE.Group>(null);
