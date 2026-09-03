@@ -240,20 +240,35 @@ export function Hud() {
           >
             Vai in pista
           </button>
-          <div className="mt-3 flex gap-3">
+          <div className="mt-3 flex flex-wrap justify-center gap-3">
             <button
               className="pointer-events-auto rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
-              onClick={openEditor}
+              onClick={() => {
+                setShowLivery(false);
+                setShowTracks((v) => !v);
+              }}
             >
-              Costruisci la pista
+              Piste
             </button>
+            {isAdmin && (
+              <button
+                className="pointer-events-auto rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
+                onClick={openEditor}
+              >
+                Costruisci la pista
+              </button>
+            )}
             <button
               className="pointer-events-auto rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
-              onClick={() => setShowLivery((v) => !v)}
+              onClick={() => {
+                setShowTracks(false);
+                setShowLivery((v) => !v);
+              }}
             >
               Personalizza auto
             </button>
           </div>
+          {showTracks && <TracksPanel onClose={() => setShowTracks(false)} />}
           {showLivery && <LiveryPanel onClose={() => setShowLivery(false)} />}
           <div className="mt-8 flex flex-wrap justify-center gap-2 text-xs text-muted-foreground">
             {[
