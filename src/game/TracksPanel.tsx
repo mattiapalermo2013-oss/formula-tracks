@@ -7,6 +7,7 @@ export function TracksPanel({ onClose }: { onClose: () => void }) {
   const { tracks, selected, select, loading, error, isAdmin, email, claimAdmin, signOut } =
     useTracksStore();
   const openEditor = useRaceStore((s) => s.openEditor);
+  const bestTimes = useBestTimesStore((s) => s.times);
 
   return (
     <div
@@ -29,22 +30,28 @@ export function TracksPanel({ onClose }: { onClose: () => void }) {
       {error && <p className="text-xs text-destructive">{error}</p>}
 
       <div className="grid gap-2 sm:grid-cols-2">
-        {tracks.map((t) => (
-          <button
-            key={t.slot}
-            onClick={() => select(t.slot)}
-            className={`flex items-center gap-3 rounded-lg border px-3 py-2 text-left transition-colors ${
-              selected === t.slot
-                ? "border-primary bg-primary/15"
-                : "border-border/60 hover:bg-foreground/5"
-            }`}
-          >
-            <span className="font-mono text-xs font-bold text-muted-foreground">
-              {String(t.slot).padStart(2, "0")}
-            </span>
-            <span className="truncate text-sm font-semibold text-foreground">{t.name}</span>
-          </button>
-        ))}
+        {tracks.map((t) => {
+          const best = bestTimes[t.slot];
+          return (
+            <button
+              key={t.slot}
+              onClick={() => select(t.slot)}
+              className={`flex items-center gap-3 rounded-lg border px-3 py-2 text-left transition-colors ${
+                selected === t.slot
+                  ? "border-primary bg-primary/15"
+                  : "border-border/60 hover:bg-foreground/5"
+              }`}
+            >
+              <span className="font-mono text-xs font-bold text-muted-foreground">
+                {String(t.slot).padStart(2, "0")}
+              </span>
+              <span className="truncate text-sm font-semibold text-foreground">{t.name}</span>
+              <span className="ml-auto shrink-0 font-mono text-xs tabular-nums text-primary">
+                {best != null ? formatTime(best) : "--:--"}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       <div className="mt-5 border-t border-border/50 pt-4 text-xs">
