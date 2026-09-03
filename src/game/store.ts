@@ -55,13 +55,8 @@ export const useRaceStore = create<RaceStore>((set, get) => ({
     }),
   finishRace: (total) => {
     set({ phase: "finished", raceTime: total });
-    // record best total time for the currently selected official track
-    void import("./tracksStore").then(({ useTracksStore }) =>
-      import("./bestTimesStore").then(({ useBestTimesStore }) => {
-        const slot = useTracksStore.getState().selected;
-        if (slot != null) useBestTimesStore.getState().record(slot, total);
-      }),
-    );
+    const slot = useTracksStore.getState().selected;
+    if (slot != null) useBestTimesStore.getState().record(slot, total);
   },
   reset: () =>
     set({
