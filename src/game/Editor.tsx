@@ -1,11 +1,23 @@
+import { useEffect, useState } from "react";
 import { PIECE_DEFS } from "./blocks";
 import { useTrackStore } from "./trackStore";
 import { useRaceStore } from "./store";
+import { useTracksStore } from "./tracksStore";
 
 export function Editor() {
   const phase = useRaceStore((s) => s.phase);
   const startRace = useRaceStore((s) => s.startRace);
   const { pieces, track, add, undo, clear, useDefault } = useTrackStore();
+  const { tracks, selected, select, isAdmin, saving, error, save } = useTracksStore();
+  const [name, setName] = useState("");
+  const [savedAt, setSavedAt] = useState(false);
+
+  const current = tracks.find((t) => t.slot === selected) ?? null;
+
+  useEffect(() => {
+    setName(current?.name ?? "");
+    setSavedAt(false);
+  }, [current?.slot, current?.name]);
 
   if (phase !== "editing") return null;
 
