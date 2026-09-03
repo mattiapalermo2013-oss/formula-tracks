@@ -304,12 +304,14 @@ export function Hud() {
             >
               Riprova
             </button>
-            <button
-              className="pointer-events-auto mt-3 block w-full rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
-              onClick={openEditor}
-            >
-              Modifica pista
-            </button>
+            {isAdmin && (
+              <button
+                className="pointer-events-auto mt-3 block w-full rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
+                onClick={openEditor}
+              >
+                Modifica pista
+              </button>
+            )}
           </div>
         </div>
       )}
