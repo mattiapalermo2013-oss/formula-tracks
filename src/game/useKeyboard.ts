@@ -6,7 +6,7 @@ export function useKeyboard() {
   useEffect(() => {
     const onDown = (e: KeyboardEvent) => {
       keys.current.add(e.code);
-      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space"].includes(e.code)) {
+      if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space", "KeyR"].includes(e.code)) {
         e.preventDefault();
       }
     };
