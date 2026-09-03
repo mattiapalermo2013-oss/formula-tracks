@@ -80,6 +80,49 @@ export function Editor() {
         >
           Corri su questa pista
         </button>
+
+        {isAdmin && (
+          <div className="mt-4 border-t border-border/50 pt-4">
+            <p className="mb-2 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-foreground/50">
+              Salva su slot ufficiale
+            </p>
+            <select
+              value={selected ?? ""}
+              onChange={(e) => select(Number(e.target.value))}
+              className="w-full rounded-lg border border-border/60 bg-background px-2 py-2 text-xs text-foreground outline-none focus:border-primary"
+            >
+              <option value="" disabled>
+                Scegli slot
+              </option>
+              {tracks.map((t) => (
+                <option key={t.slot} value={t.slot}>
+                  {String(t.slot).padStart(2, "0")} · {t.name}
+                </option>
+              ))}
+            </select>
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Nome della pista"
+              className="mt-2 w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
+            />
+            <button
+              disabled={saving || selected == null || !name.trim()}
+              onClick={async () => {
+                if (selected == null) return;
+                await save(selected, name.trim(), pieces);
+                setSavedAt(true);
+              }}
+              className="mt-2 w-full rounded-full border border-primary bg-primary/15 px-6 py-2.5 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-primary/25 disabled:opacity-40"
+            >
+              {saving ? "Salvo…" : "Salva pista"}
+            </button>
+            {savedAt && !error && (
+              <p className="mt-2 text-[0.7rem] text-muted-foreground">Pista salvata.</p>
+            )}
+            {error && <p className="mt-2 text-[0.7rem] text-destructive">{error}</p>}
+          </div>
+        )}
       </div>
 
       <div className="pointer-events-auto absolute bottom-4 left-1/2 max-w-[90vw] -translate-x-1/2 overflow-x-auto rounded-full border border-border/40 bg-card/85 px-4 py-2 backdrop-blur-md">
