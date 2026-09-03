@@ -93,10 +93,12 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
     const resetPressed = k.has("KeyR");
 
     if (resetPressed && !lastResetKey.current && racing) {
-      const cpIndex = s.checkpoint === 0 ? 0 : (trk.checkpoints[s.checkpoint - 1] ?? 0);
-      Object.assign(s, spawnAt(trk, cpIndex + 1), {
-        vx: 0, vz: 0, vy: 0, grounded: true, trackIdx: cpIndex + 1,
+      // Full reset: back to the start line, stopped, with the clock cleared.
+      Object.assign(s, spawnAt(trk, 2), {
+        vx: 0, vz: 0, vy: 0, grounded: true, trackIdx: 2,
+        lap: 1, checkpoint: 0, lapStart: 0, elapsed: 0, timerStarted: false,
       });
+      store.setTelemetry(0, 0);
     }
     lastResetKey.current = resetPressed;
 
