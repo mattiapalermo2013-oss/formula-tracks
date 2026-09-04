@@ -31,7 +31,7 @@ export function TracksPanel({ onClose }: { onClose: () => void }) {
 
       <div className="grid gap-2 sm:grid-cols-2">
         {tracks.map((t) => {
-          const best = bestTimes[t.slot];
+          const best = bestTimes[t.slot]?.total;
           return (
             <button
               key={t.slot}
