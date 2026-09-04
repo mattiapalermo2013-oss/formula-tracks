@@ -180,7 +180,10 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
         const crossed =
           (prev < nextCp && s.trackIdx >= nextCp) ||
           (nextCp < 20 && s.trackIdx >= nextCp && prev > trk.count - 20);
-        if (crossed) s.checkpoint += 1;
+        if (crossed) {
+          store.passCheckpoint(s.checkpoint, s.elapsed);
+          s.checkpoint += 1;
+        }
       }
       if (s.trackIdx < 20 && s.checkpoint >= trk.checkpoints.length) {
         const lapTime = s.elapsed - s.lapStart;

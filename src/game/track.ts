@@ -1,18 +1,19 @@
 import * as THREE from "three";
-import { buildPolyline, type PieceType } from "./blocks";
+import { BASE_HALF, buildPolyline, type PieceType } from "./blocks";
 
 // ---------------------------------------------------------------------------
 // A Track is the resampled centerline of a block layout. Geometry, collision
 // and checkpoints all read from the same samples so visuals and physics agree.
 // ---------------------------------------------------------------------------
 
-export const HALF_WIDTH = 6;
+export const HALF_WIDTH = BASE_HALF;
 export const LAPS_TO_WIN = 1;
 
 export interface TrackSample {
   pos: THREE.Vector3;
   tangent: THREE.Vector3;
   right: THREE.Vector2; // XZ perpendicular, unit length
+  half: number; // half road width at this sample
 }
 
 export interface Track {
@@ -22,8 +23,20 @@ export interface Track {
   length: number;
 }
 
-function resample(points: THREE.Vector3[], spacing: number): THREE.Vector3[] {
+interface Resampled {
+  points: THREE.Vector3[];
+  widths: number[];
+  checkpoints: number[];
+}
+
+function resample(
+  points: THREE.Vector3[],
+  widths: number[],
+  marks: number[],
+  spacing: number,
+): Resampled {
   const closed = [...points, points[0]!.clone()];
+  const closedW = [...widths, widths[0]!];
   const cum: number[] = [0];
   for (let i = 1; i < closed.length; i++) {
     cum.push(cum[i - 1]! + closed[i]!.distanceTo(closed[i - 1]!));
@@ -31,6 +44,7 @@ function resample(points: THREE.Vector3[], spacing: number): THREE.Vector3[] {
   const total = cum[cum.length - 1]!;
   const n = Math.max(120, Math.round(total / spacing));
   const out: THREE.Vector3[] = [];
+  const outW: number[] = [];
   let seg = 0;
   for (let i = 0; i < n; i++) {
     const d = (i / n) * total;
@@ -38,8 +52,13 @@ function resample(points: THREE.Vector3[], spacing: number): THREE.Vector3[] {
     const segLen = cum[seg + 1]! - cum[seg]! || 1;
     const t = (d - cum[seg]!) / segLen;
     out.push(closed[seg]!.clone().lerp(closed[seg + 1]!, t));
+    outW.push(THREE.MathUtils.lerp(closedW[seg]!, closedW[seg + 1]!, t));
   }
-  return out;
+  const checkpoints = marks
+    .map((m) => Math.round(((cum[Math.min(m, cum.length - 1)]! / (total || 1)) * n)) % n)
+    .filter((v, i, arr) => v > 0 && arr.indexOf(v) === i)
+    .sort((a, b) => a - b);
+  return { points: out, widths: outW, checkpoints };
 }
 
 // Light smoothing keeps the ribbon clean without rounding away sharp corners.
@@ -60,29 +79,40 @@ function smooth(points: THREE.Vector3[], passes: number): THREE.Vector3[] {
   return pts;
 }
 
+function smoothScalar(vals: number[], passes: number): number[] {
+  let out = vals;
+  const n = vals.length;
+  for (let p = 0; p < passes; p++) {
+    out = out.map((cur, i) => cur * 0.5 + (out[(i - 1 + n) % n]! + out[(i + 1) % n]!) * 0.25);
+  }
+  return out;
+}
+
 export function buildTrack(pieces: PieceType[]): Track {
-  const poly = smooth(resample(buildPolyline(pieces), 1.5), 2);
-  const count = poly.length;
-  const samples: TrackSample[] = poly.map((pos, i) => {
-    const next = poly[(i + 1) % count]!;
-    const prev = poly[(i - 1 + count) % count]!;
+  const poly = buildPolyline(pieces);
+  const rs = resample(poly.points, poly.widths, poly.marks, 1.5);
+  const pts = smooth(rs.points, 2);
+  const widths = smoothScalar(rs.widths, 6);
+  const count = pts.length;
+  const samples: TrackSample[] = pts.map((pos, i) => {
+    const next = pts[(i + 1) % count]!;
+    const prev = pts[(i - 1 + count) % count]!;
     const tangent = next.clone().sub(prev).normalize();
     return {
       pos,
       tangent,
       right: new THREE.Vector2(tangent.z, -tangent.x).normalize(),
+      half: widths[i] ?? BASE_HALF,
     };
   });
   let length = 0;
   for (let i = 0; i < count; i++) {
     length += samples[i]!.pos.distanceTo(samples[(i + 1) % count]!.pos);
   }
-  return {
-    samples,
-    count,
-    checkpoints: [0.25, 0.5, 0.75].map((f) => Math.floor(count * f)),
-    length,
-  };
+  const checkpoints = rs.checkpoints.length
+    ? rs.checkpoints
+    : [0.25, 0.5, 0.75].map((f) => Math.floor(count * f));
+  return { samples, count, checkpoints, length };
 }
 
 export function yawAt(track: Track, index: number): number {
@@ -116,7 +146,7 @@ export function trackQuery(track: Track, px: number, pz: number, prevIndex: numb
   const s = track.samples[best]!;
   const r = s.right;
   const lat = (px - s.pos.x) * r.x + (pz - s.pos.z) * r.y;
-  const limit = HALF_WIDTH - 1.2;
+  const limit = s.half - 1.2;
   if (Math.abs(lat) > limit) {
     const sign = Math.sign(lat);
     const push = Math.abs(lat) - limit;

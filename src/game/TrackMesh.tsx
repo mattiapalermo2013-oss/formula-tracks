@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { HALF_WIDTH, distanceToTrack, seededRandom, type Track } from "./track";
 import { useTrackStore } from "./trackStore";
 
-function buildRibbon(track: Track, halfWidth: number, yOffset: number) {
+function buildRibbon(track: Track, extra: number, yOffset: number) {
   const geom = new THREE.BufferGeometry();
   const n = track.count;
   const positions = new Float32Array(n * 2 * 3);
@@ -11,8 +11,8 @@ function buildRibbon(track: Track, halfWidth: number, yOffset: number) {
 
   for (let i = 0; i < n; i++) {
     const s = track.samples[i]!;
-    const rx = s.right.x * halfWidth;
-    const rz = s.right.y * halfWidth;
+    const rx = s.right.x * (s.half + extra);
+    const rz = s.right.y * (s.half + extra);
     positions[i * 6 + 0] = s.pos.x - rx;
     positions[i * 6 + 1] = s.pos.y + yOffset;
     positions[i * 6 + 2] = s.pos.z - rz;
@@ -48,10 +48,10 @@ function buildWalls(track: Track) {
     const b = track.samples[(i + WALL_STEP) % track.count]!;
     block++;
     for (const sign of [-1, 1]) {
-      const ax = a.pos.x + a.right.x * (HALF_WIDTH + 0.35) * sign;
-      const az = a.pos.z + a.right.y * (HALF_WIDTH + 0.35) * sign;
-      const bx = b.pos.x + b.right.x * (HALF_WIDTH + 0.35) * sign;
-      const bz = b.pos.z + b.right.y * (HALF_WIDTH + 0.35) * sign;
+      const ax = a.pos.x + a.right.x * (a.half + 0.35) * sign;
+      const az = a.pos.z + a.right.y * (a.half + 0.35) * sign;
+      const bx = b.pos.x + b.right.x * (b.half + 0.35) * sign;
+      const bz = b.pos.z + b.right.y * (b.half + 0.35) * sign;
       const len = Math.hypot(bx - ax, bz - az) * 1.06;
       dummy.position.set((ax + bx) / 2, (a.pos.y + b.pos.y) / 2 + WALL_HEIGHT / 2, (az + bz) / 2);
       dummy.rotation.set(0, Math.atan2(bx - ax, bz - az), 0);
@@ -165,23 +165,54 @@ function Scenery({ track }: { track: Track }) {
   );
 }
 
+function Gates({ track }: { track: Track }) {
+  return (
+    <group>
+      {track.checkpoints.map((idx, i) => {
+        const s = track.samples[idx % track.count]!;
+        const yaw = Math.atan2(s.tangent.x, s.tangent.z);
+        const w = s.half;
+        return (
+          <group key={i} position={[s.pos.x, s.pos.y, s.pos.z]} rotation={[0, yaw, 0]}>
+            <mesh position={[0, 0.05, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+              <planeGeometry args={[w * 2, 1.2]} />
+              <meshStandardMaterial color="#3fa9e0" flatShading />
+            </mesh>
+            {[-1, 1].map((side) => (
+              <mesh key={side} position={[side * (w + 0.9), 2.4, 0]} castShadow>
+                <boxGeometry args={[0.6, 4.8, 0.6]} />
+                <meshStandardMaterial color="#3fa9e0" flatShading />
+              </mesh>
+            ))}
+            <mesh position={[0, 5, 0]} castShadow>
+              <boxGeometry args={[w * 2 + 2.4, 0.9, 0.6]} />
+              <meshStandardMaterial color="#3fa9e0" flatShading />
+            </mesh>
+          </group>
+        );
+      })}
+    </group>
+  );
+}
+
 function StartLine({ track }: { track: Track }) {
   const s = track.samples[0]!;
   const yaw = Math.atan2(s.tangent.x, s.tangent.z);
+  const HW = s.half;
   return (
     <group position={[s.pos.x, s.pos.y, s.pos.z]} rotation={[0, yaw, 0]}>
       <mesh position={[0, 0.06, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <planeGeometry args={[HALF_WIDTH * 2, 2.4]} />
+        <planeGeometry args={[HW * 2, 2.4]} />
         <meshStandardMaterial color="#f2f4f7" flatShading />
       </mesh>
       {[-1, 1].map((side) => (
-        <mesh key={side} position={[side * (HALF_WIDTH + 1), 3, 0]} castShadow>
+        <mesh key={side} position={[side * (HW + 1), 3, 0]} castShadow>
           <boxGeometry args={[0.8, 6, 0.8]} />
           <meshStandardMaterial color="#e0483a" flatShading />
         </mesh>
       ))}
       <mesh position={[0, 6.2, 0]} castShadow>
-        <boxGeometry args={[HALF_WIDTH * 2 + 2.6, 1.2, 0.7]} />
+        <boxGeometry args={[HW * 2 + 2.6, 1.2, 0.7]} />
         <meshStandardMaterial color="#e0483a" flatShading />
       </mesh>
     </group>
@@ -190,8 +221,8 @@ function StartLine({ track }: { track: Track }) {
 
 export function TrackMesh() {
   const track = useTrackStore((s) => s.track);
-  const road = useMemo(() => buildRibbon(track, HALF_WIDTH, 0.02), [track]);
-  const shoulder = useMemo(() => buildRibbon(track, HALF_WIDTH + 1.4, -0.35), [track]);
+  const road = useMemo(() => buildRibbon(track, 0, 0.02), [track]);
+  const shoulder = useMemo(() => buildRibbon(track, 1.4, -0.35), [track]);
 
   return (
     <group>
@@ -204,6 +235,7 @@ export function TrackMesh() {
       <Walls track={track} />
       <Pillars track={track} />
       <StartLine track={track} />
+      <Gates track={track} />
       <Scenery track={track} />
     </group>
   );
