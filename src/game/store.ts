@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { LAPS_TO_WIN } from "./track";
 import { useTracksStore } from "./tracksStore";
 import { useBestTimesStore } from "./bestTimesStore";
+import { useLeaderboardStore } from "./leaderboardStore";
 
 export type RacePhase = "ready" | "editing" | "racing" | "finished";
 
@@ -48,7 +49,7 @@ export const useRaceStore = create<RaceStore>((set, get) => ({
   splits: [],
   lastSplit: null,
   openEditor: () => set({ phase: "editing", lap: 1, checkpoint: 0, elapsed: 0, speed: 0, raceTime: null, raceDelta: null, lastLap: null, splits: [], lastSplit: null }),
-  startRace: () => set({ phase: "racing", lap: 1, checkpoint: 0, elapsed: 0, raceTime: null, raceDelta: null, lastLap: null, splits: [], lastSplit: null }),
+  startRace: () => (useLeaderboardStore.getState().clearRank(), set({ phase: "racing", lap: 1, checkpoint: 0, elapsed: 0, raceTime: null, raceDelta: null, lastLap: null, splits: [], lastSplit: null })),
   passCheckpoint: (index, time) => {
     const slot = useTracksStore.getState().selected;
     const ref = useBestTimesStore.getState().splitsFor(slot)[index];
@@ -75,7 +76,10 @@ export const useRaceStore = create<RaceStore>((set, get) => ({
     const slot = useTracksStore.getState().selected;
     const prevBest = useBestTimesStore.getState().bestFor(slot);
     set({ phase: "finished", raceTime: total, raceDelta: prevBest != null ? total - prevBest : null });
-    if (slot != null) useBestTimesStore.getState().record(slot, total, splits);
+    if (slot != null) {
+      useBestTimesStore.getState().record(slot, total, splits);
+      void useLeaderboardStore.getState().submit(slot, total);
+    }
   },
   reset: () =>
     set({
