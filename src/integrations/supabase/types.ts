@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      lap_times: {
+        Row: {
+          created_at: string
+          id: string
+          player_name: string
+          slot: number
+          time_ms: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          player_name: string
+          slot: number
+          time_ms: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          player_name?: string
+          slot?: number
+          time_ms?: number
+        }
+        Relationships: []
+      }
       tracks: {
         Row: {
           name: string
