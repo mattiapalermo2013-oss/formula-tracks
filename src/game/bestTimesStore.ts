@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-const KEY = "polyrush-best-times";
+const KEY = "polyrush-best-times-v2";
 
 interface BestEntry {
   total: number;
@@ -38,6 +38,9 @@ interface BestTimesState {
   times: BestMap;
   record: (slot: number, total: number, splits?: number[]) => void;
   splitsFor: (slot: number | null) => number[];
+  bestFor: (slot: number | null) => number | null;
+  clear: (slot: number) => void;
+  clearAll: () => void;
 }
 
 export const useBestTimesStore = create<BestTimesState>((set, get) => ({
@@ -50,4 +53,15 @@ export const useBestTimesStore = create<BestTimesState>((set, get) => ({
     set({ times });
   },
   splitsFor: (slot) => (slot == null ? [] : (get().times[slot]?.splits ?? [])),
+  bestFor: (slot) => (slot == null ? null : (get().times[slot]?.total ?? null)),
+  clear: (slot) => {
+    const times = { ...get().times };
+    delete times[slot];
+    if (typeof window !== "undefined") localStorage.setItem(KEY, JSON.stringify(times));
+    set({ times });
+  },
+  clearAll: () => {
+    if (typeof window !== "undefined") localStorage.removeItem(KEY);
+    set({ times: {} });
+  },
 }));

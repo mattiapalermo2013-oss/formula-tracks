@@ -154,7 +154,7 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
 }
 
 export function Hud() {
-  const { phase, checkpoint, speed, elapsed, lastLap, bestLap, raceTime, lastSplit, startRace, reset, openEditor } =
+  const { phase, checkpoint, speed, elapsed, lastLap, bestLap, raceTime, raceDelta, lastSplit, startRace, reset, openEditor } =
     useRaceStore();
   const gates = useTrackStore((s) => s.track.checkpoints.length);
   const [splitVisible, setSplitVisible] = useState(false);
@@ -328,6 +328,20 @@ export function Hud() {
             <p className="mt-6 font-mono text-5xl font-bold tabular-nums text-primary">
               {raceTime !== null ? formatTime(raceTime) : "--"}
             </p>
+            {raceDelta !== null ? (
+              <p
+                className={`mt-2 font-mono text-2xl font-bold tabular-nums ${
+                  raceDelta <= 0 ? "text-emerald-400" : "text-destructive"
+                }`}
+              >
+                {raceDelta <= 0 ? "-" : "+"}
+                {formatTime(Math.abs(raceDelta))}
+              </p>
+            ) : (
+              <p className="mt-2 font-mono text-sm font-bold uppercase tracking-widest text-emerald-400">
+                Primo record
+              </p>
+            )}
             <p className="mt-2 text-sm text-muted-foreground">
               Record {bestLap ? formatTime(bestLap) : "--"}
             </p>
