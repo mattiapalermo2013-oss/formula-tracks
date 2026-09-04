@@ -8,6 +8,7 @@ export function TracksPanel({ onClose }: { onClose: () => void }) {
     useTracksStore();
   const openEditor = useRaceStore((s) => s.openEditor);
   const bestTimes = useBestTimesStore((s) => s.times);
+  const clearAllTimes = useBestTimesStore((s) => s.clearAll);
 
   return (
     <div
@@ -52,6 +53,15 @@ export function TracksPanel({ onClose }: { onClose: () => void }) {
             </button>
           );
         })}
+      </div>
+
+      <div className="mt-4 flex justify-end">
+        <button
+          onClick={clearAllTimes}
+          className="rounded-full border border-border/60 px-4 py-2 text-[0.65rem] font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
+        >
+          Azzera record
+        </button>
       </div>
 
       <div className="mt-5 border-t border-border/50 pt-4 text-xs">
