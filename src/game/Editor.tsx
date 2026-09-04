@@ -23,7 +23,7 @@ export function Editor() {
 
   return (
     <div className="pointer-events-none fixed inset-0 z-20 select-none">
-      <div className="pointer-events-auto absolute left-4 top-4 w-72 rounded-2xl border border-border/40 bg-card/90 p-4 backdrop-blur-md">
+      <div className="pointer-events-auto absolute left-4 top-4 w-72 max-h-[calc(100vh-2rem)] overflow-y-auto overscroll-contain rounded-2xl border border-border/40 bg-card/90 p-4 backdrop-blur-md">
         <h2 className="text-lg font-black uppercase tracking-tight text-foreground">
           Costruisci la pista
         </h2>

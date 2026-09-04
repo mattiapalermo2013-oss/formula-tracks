@@ -10,6 +10,7 @@ import {
   type LiveryPattern,
 } from "./liveryStore";
 import { useTracksStore } from "./tracksStore";
+import { useTrackStore } from "./trackStore";
 import { TracksPanel } from "./TracksPanel";
 
 function Turntable() {
@@ -153,8 +154,10 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
 }
 
 export function Hud() {
-  const { phase, checkpoint, speed, elapsed, lastLap, bestLap, raceTime, startRace, reset, openEditor } =
+  const { phase, checkpoint, speed, elapsed, lastLap, bestLap, raceTime, lastSplit, startRace, reset, openEditor } =
     useRaceStore();
+  const gates = useTrackStore((s) => s.track.checkpoints.length);
+  const [splitVisible, setSplitVisible] = useState(false);
   const [showLivery, setShowLivery] = useState(false);
   const [showTracks, setShowTracks] = useState(false);
   const fetchAll = useTracksStore((s) => s.fetchAll);
@@ -165,6 +168,16 @@ export function Hud() {
     void fetchAll();
     void refreshAuth();
   }, [fetchAll, refreshAuth]);
+
+  useEffect(() => {
+    if (!lastSplit) {
+      setSplitVisible(false);
+      return;
+    }
+    setSplitVisible(true);
+    const t = window.setTimeout(() => setSplitVisible(false), 3000);
+    return () => window.clearTimeout(t);
+  }, [lastSplit?.key]);
 
   useEffect(() => {
     if (phase !== "racing") return;
@@ -194,7 +207,7 @@ export function Hud() {
           </div>
 
           <div className="absolute bottom-6 left-6 flex items-center gap-2">
-            {[0, 1, 2].map((i) => (
+            {Array.from({ length: gates }, (_, i) => i).map((i) => (
               <span
                 key={i}
                 className={`h-2 w-10 rounded-full ${
@@ -211,6 +224,27 @@ export function Hud() {
             >
               Menu <span className="font-mono text-foreground/50">[Esc]</span>
             </button>
+          )}
+
+          {splitVisible && lastSplit && phase === "racing" && (
+            <div className="absolute left-1/2 top-24 -translate-x-1/2 rounded-xl border border-border/40 bg-card/85 px-6 py-3 text-center backdrop-blur-md">
+              <div className="text-[0.65rem] font-semibold uppercase tracking-[0.25em] text-foreground/50">
+                Settore {lastSplit.index + 1}
+              </div>
+              <div className="font-mono text-2xl font-bold tabular-nums text-foreground">
+                {formatTime(lastSplit.time)}
+              </div>
+              {lastSplit.delta !== null && (
+                <div
+                  className={`font-mono text-sm font-bold tabular-nums ${
+                    lastSplit.delta <= 0 ? "text-emerald-400" : "text-destructive"
+                  }`}
+                >
+                  {lastSplit.delta <= 0 ? "-" : "+"}
+                  {formatTime(Math.abs(lastSplit.delta))}
+                </div>
+              )}
+            </div>
           )}
 
           {lastLap !== null && phase === "racing" && (
