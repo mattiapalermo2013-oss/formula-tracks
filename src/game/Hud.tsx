@@ -12,6 +12,8 @@ import {
 import { useTracksStore } from "./tracksStore";
 import { useTrackStore } from "./trackStore";
 import { TracksPanel } from "./TracksPanel";
+import { LeaderboardPanel } from "./LeaderboardPanel";
+import { useLeaderboardStore } from "./leaderboardStore";
 
 function Turntable() {
   const ref = useRef<THREE.Group>(null);
@@ -160,6 +162,10 @@ export function Hud() {
   const [splitVisible, setSplitVisible] = useState(false);
   const [showLivery, setShowLivery] = useState(false);
   const [showTracks, setShowTracks] = useState(false);
+  const [showBoard, setShowBoard] = useState(false);
+  const lastRank = useLeaderboardStore((s) => s.lastRank);
+  const playerName = useLeaderboardStore((s) => s.name);
+  const setPlayerName = useLeaderboardStore((s) => s.setName);
   const fetchAll = useTracksStore((s) => s.fetchAll);
   const refreshAuth = useTracksStore((s) => s.refreshAuth);
   const isAdmin = useTracksStore((s) => s.isAdmin);
@@ -278,10 +284,21 @@ export function Hud() {
               className="pointer-events-auto rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
               onClick={() => {
                 setShowLivery(false);
+                setShowBoard(false);
                 setShowTracks((v) => !v);
               }}
             >
               Piste
+            </button>
+            <button
+              className="pointer-events-auto rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
+              onClick={() => {
+                setShowLivery(false);
+                setShowTracks(false);
+                setShowBoard((v) => !v);
+              }}
+            >
+              Classifica
             </button>
             {isAdmin && (
               <button
@@ -295,6 +312,7 @@ export function Hud() {
               className="pointer-events-auto rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
               onClick={() => {
                 setShowTracks(false);
+                setShowBoard(false);
                 setShowLivery((v) => !v);
               }}
             >
@@ -302,6 +320,7 @@ export function Hud() {
             </button>
           </div>
           {showTracks && <TracksPanel onClose={() => setShowTracks(false)} />}
+          {showBoard && <LeaderboardPanel onClose={() => setShowBoard(false)} />}
           {showLivery && <LiveryPanel onClose={() => setShowLivery(false)} />}
           <div className="mt-8 flex flex-wrap justify-center gap-2 text-xs text-muted-foreground">
             {[
@@ -345,6 +364,27 @@ export function Hud() {
             <p className="mt-2 text-sm text-muted-foreground">
               Record {bestLap ? formatTime(bestLap) : "--"}
             </p>
+            {playerName.trim() ? (
+              lastRank !== null && (
+                <p className="mt-4 font-mono text-sm font-bold uppercase tracking-widest text-foreground">
+                  Posizione mondiale{" "}
+                  <span className="text-primary">#{lastRank}</span>
+                </p>
+              )
+            ) : (
+              <div className="mt-4">
+                <p className="mb-2 text-xs text-muted-foreground">
+                  Inserisci un nome per entrare in classifica
+                </p>
+                <input
+                  value={playerName}
+                  onChange={(e) => setPlayerName(e.target.value)}
+                  placeholder="Pilota"
+                  maxLength={24}
+                  className="pointer-events-auto w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-center text-sm font-semibold text-foreground outline-none focus:border-primary"
+                />
+              </div>
+            )}
             <button
               className="pointer-events-auto mt-8 rounded-full bg-primary px-8 py-3 text-sm font-bold uppercase tracking-widest text-primary-foreground transition-transform hover:scale-105"
               onClick={startRace}
