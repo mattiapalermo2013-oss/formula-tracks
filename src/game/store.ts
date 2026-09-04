@@ -22,6 +22,9 @@ interface RaceStore {
   lastLap: number | null;
   bestLap: number | null;
   raceTime: number | null; // final total when finished
+  splits: number[]; // cumulative time at each checkpoint this lap
+  lastSplit: { index: number; time: number; delta: number | null; key: number } | null;
+  passCheckpoint: (index: number, time: number) => void;
   startRace: () => void;
   openEditor: () => void;
   setTelemetry: (speed: number, elapsed: number) => void;
@@ -40,8 +43,20 @@ export const useRaceStore = create<RaceStore>((set, get) => ({
   lastLap: null,
   bestLap: loadBest(),
   raceTime: null,
-  openEditor: () => set({ phase: "editing", lap: 1, checkpoint: 0, elapsed: 0, speed: 0, raceTime: null, lastLap: null }),
-  startRace: () => set({ phase: "racing", lap: 1, checkpoint: 0, elapsed: 0, raceTime: null, lastLap: null }),
+  splits: [],
+  lastSplit: null,
+  openEditor: () => set({ phase: "editing", lap: 1, checkpoint: 0, elapsed: 0, speed: 0, raceTime: null, lastLap: null, splits: [], lastSplit: null }),
+  startRace: () => set({ phase: "racing", lap: 1, checkpoint: 0, elapsed: 0, raceTime: null, lastLap: null, splits: [], lastSplit: null }),
+  passCheckpoint: (index, time) => {
+    const slot = useTracksStore.getState().selected;
+    const ref = useBestTimesStore.getState().splitsFor(slot)[index];
+    const splits = get().splits.slice(0, index);
+    splits[index] = time;
+    set({
+      splits,
+      lastSplit: { index, time, delta: ref != null ? time - ref : null, key: Date.now() },
+    });
+  },
   setTelemetry: (speed, elapsed) => set({ speed, elapsed }),
   setProgress: (lap, checkpoint) => {
     const s = get();
@@ -54,9 +69,10 @@ export const useRaceStore = create<RaceStore>((set, get) => ({
       return { lastLap: lapTime, bestLap };
     }),
   finishRace: (total) => {
+    const splits = get().splits;
     set({ phase: "finished", raceTime: total });
     const slot = useTracksStore.getState().selected;
-    if (slot != null) useBestTimesStore.getState().record(slot, total);
+    if (slot != null) useBestTimesStore.getState().record(slot, total, splits);
   },
   reset: () =>
     set({
@@ -67,6 +83,8 @@ export const useRaceStore = create<RaceStore>((set, get) => ({
       elapsed: 0,
       lastLap: null,
       raceTime: null,
+      splits: [],
+      lastSplit: null,
     }),
 }));
 
