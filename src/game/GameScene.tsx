@@ -15,22 +15,6 @@ function Ground() {
         <planeGeometry args={[600, 600]} />
         <meshStandardMaterial color="#5f9e57" />
       </mesh>
-      {/* distant low-poly hills */}
-      {Array.from({ length: 16 }).map((_, i) => {
-        const a = (i / 16) * Math.PI * 2;
-        const r = 190 + ((i * 37) % 60);
-        return (
-          <mesh
-            key={i}
-            position={[Math.cos(a) * r, -0.5, Math.sin(a) * r]}
-            rotation={[0, a, 0]}
-            receiveShadow
-          >
-            <coneGeometry args={[40 + ((i * 13) % 25), 26 + ((i * 7) % 22), 5]} />
-            <meshStandardMaterial color={i % 2 ? "#4d8a52" : "#578f63"} flatShading />
-          </mesh>
-        );
-      })}
     </>
   );
 }
