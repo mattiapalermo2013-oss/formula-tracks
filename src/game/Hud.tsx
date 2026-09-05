@@ -1,4 +1,5 @@
 import { Suspense, useEffect, useRef, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { formatTime, useRaceStore } from "./store";
