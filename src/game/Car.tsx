@@ -6,6 +6,7 @@ import { useTrackStore } from "./trackStore";
 import { useKeyboard } from "./useKeyboard";
 import { useRaceStore } from "./store";
 import { CarModel } from "./CarModel";
+import { useControlsStore } from "./controlsStore";
 
 // Feel constants — tune these, not the model.
 const ACCEL = 34;
