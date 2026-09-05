@@ -294,6 +294,7 @@ export function Hud() {
               className="pointer-events-auto rounded-full bg-primary px-10 py-4 text-base font-bold uppercase tracking-widest text-primary-foreground transition-transform hover:scale-105"
               onClick={() => {
                 setShowLivery(false);
+                setShowControls(false);
                 setShowTracks((v) => !v);
               }}
             >
@@ -311,14 +312,26 @@ export function Hud() {
               className="pointer-events-auto rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
               onClick={() => {
                 setShowTracks(false);
+                setShowControls(false);
                 setShowLivery((v) => !v);
               }}
             >
               Personalizza auto
             </button>
+            <button
+              className="pointer-events-auto rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
+              onClick={() => {
+                setShowTracks(false);
+                setShowLivery(false);
+                setShowControls((v) => !v);
+              }}
+            >
+              Comandi
+            </button>
           </div>
           {showTracks && <TracksPanel onClose={() => setShowTracks(false)} />}
           {showLivery && <LiveryPanel onClose={() => setShowLivery(false)} />}
+          {showControls && <ControlsPanel onClose={() => setShowControls(false)} />}
           <div className="mt-8 flex flex-wrap justify-center gap-2 text-xs text-muted-foreground">
             {[
               ["W / ↑", "accelera"],
