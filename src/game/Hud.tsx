@@ -334,11 +334,11 @@ export function Hud() {
           {showControls && <ControlsPanel onClose={() => setShowControls(false)} />}
           <div className="mt-8 flex flex-wrap justify-center gap-2 text-xs text-muted-foreground">
             {[
-              ["W / ↑", "accelera"],
-              ["S / ↓", "frena"],
-              ["A D / ← →", "sterza"],
-              ["Spazio", "derapata"],
-              ["R", "reset"],
+              [`${keyName(bindings.accelerate)} / ↑`, "accelera"],
+              [`${keyName(bindings.brake)} / ↓`, "frena"],
+              [`${keyName(bindings.left)} ${keyName(bindings.right)} / ← →`, "sterza"],
+              [keyName(bindings.handbrake), "derapata"],
+              [keyName(bindings.reset), "reset"],
               ["Esc", "menu"],
             ].map(([k, d]) => (
               <span key={k} className="rounded-md border border-border/50 bg-card/70 px-3 py-1.5">
