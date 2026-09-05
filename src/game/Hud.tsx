@@ -282,21 +282,10 @@ export function Hud() {
               className="pointer-events-auto rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
               onClick={() => {
                 setShowLivery(false);
-                setShowBoard(false);
                 setShowTracks((v) => !v);
               }}
             >
               Piste
-            </button>
-            <button
-              className="pointer-events-auto rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
-              onClick={() => {
-                setShowLivery(false);
-                setShowTracks(false);
-                setShowBoard((v) => !v);
-              }}
-            >
-              Classifica
             </button>
             {isAdmin && (
               <button
@@ -310,7 +299,6 @@ export function Hud() {
               className="pointer-events-auto rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
               onClick={() => {
                 setShowTracks(false);
-                setShowBoard(false);
                 setShowLivery((v) => !v);
               }}
             >
@@ -318,7 +306,6 @@ export function Hud() {
             </button>
           </div>
           {showTracks && <TracksPanel onClose={() => setShowTracks(false)} />}
-          {showBoard && <LeaderboardPanel onClose={() => setShowBoard(false)} />}
           {showLivery && <LiveryPanel onClose={() => setShowLivery(false)} />}
           <div className="mt-8 flex flex-wrap justify-center gap-2 text-xs text-muted-foreground">
             {[
