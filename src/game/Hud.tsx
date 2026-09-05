@@ -1,4 +1,5 @@
 import { Suspense, useEffect, useRef, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { formatTime, useRaceStore } from "./store";
@@ -263,6 +264,20 @@ export function Hud() {
       {phase === "ready" && (
         <div className="pointer-events-auto absolute inset-0 flex flex-col items-center overflow-y-auto bg-background/70 py-6 backdrop-blur-sm">
           <div className="my-auto flex flex-col items-center">
+          <div className="mb-4 flex items-center gap-3">
+            {userId ? (
+              <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">
+                Account connesso
+              </span>
+            ) : (
+              <Link
+                to="/auth"
+                className="pointer-events-auto rounded-full border border-primary px-6 py-2 text-xs font-bold uppercase tracking-widest text-primary transition-colors hover:bg-primary/10"
+              >
+                Accedi
+              </Link>
+            )}
+          </div>
           <p className="text-xs font-semibold uppercase tracking-[0.45em] text-primary">
             Arcade racing
           </p>
