@@ -29,6 +29,7 @@ interface LeaderboardState {
   refreshAuth: () => Promise<void>;
   fetch: (slot: number) => Promise<void>;
   submit: (slot: number, seconds: number) => Promise<void>;
+  rankFor: (slot: number, time_ms: number) => Promise<void>;
   clearRank: () => void;
 }
 
@@ -129,4 +130,4 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
       .lt("time_ms", time_ms);
     set({ lastRank: (count ?? 0) + 1 });
   },
-}) as LeaderboardState & { rankFor: (slot: number, time_ms: number) => Promise<void> });
+}));
