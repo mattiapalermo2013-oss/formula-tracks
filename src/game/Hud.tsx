@@ -14,6 +14,8 @@ import { useTracksStore } from "./tracksStore";
 import { useTrackStore } from "./trackStore";
 import { TracksPanel } from "./TracksPanel";
 import { useLeaderboardStore } from "./leaderboardStore";
+import { ControlsPanel } from "./ControlsPanel";
+import { keyName, useControlsStore } from "./controlsStore";
 
 function Turntable() {
   const ref = useRef<THREE.Group>(null);
@@ -162,6 +164,8 @@ export function Hud() {
   const [splitVisible, setSplitVisible] = useState(false);
   const [showLivery, setShowLivery] = useState(false);
   const [showTracks, setShowTracks] = useState(false);
+  const [showControls, setShowControls] = useState(false);
+  const bindings = useControlsStore((s) => s.bindings);
   const lastRank = useLeaderboardStore((s) => s.lastRank);
   const userId = useLeaderboardStore((s) => s.userId);
   const refreshLeaderboardAuth = useLeaderboardStore((s) => s.refreshAuth);
@@ -292,6 +296,7 @@ export function Hud() {
               className="pointer-events-auto rounded-full bg-primary px-10 py-4 text-base font-bold uppercase tracking-widest text-primary-foreground transition-transform hover:scale-105"
               onClick={() => {
                 setShowLivery(false);
+                setShowControls(false);
                 setShowTracks((v) => !v);
               }}
             >
@@ -309,21 +314,33 @@ export function Hud() {
               className="pointer-events-auto rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
               onClick={() => {
                 setShowTracks(false);
+                setShowControls(false);
                 setShowLivery((v) => !v);
               }}
             >
               Personalizza auto
             </button>
+            <button
+              className="pointer-events-auto rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
+              onClick={() => {
+                setShowTracks(false);
+                setShowLivery(false);
+                setShowControls((v) => !v);
+              }}
+            >
+              Comandi
+            </button>
           </div>
           {showTracks && <TracksPanel onClose={() => setShowTracks(false)} />}
           {showLivery && <LiveryPanel onClose={() => setShowLivery(false)} />}
+          {showControls && <ControlsPanel onClose={() => setShowControls(false)} />}
           <div className="mt-8 flex flex-wrap justify-center gap-2 text-xs text-muted-foreground">
             {[
-              ["W / ↑", "accelera"],
-              ["S / ↓", "frena"],
-              ["A D / ← →", "sterza"],
-              ["Spazio", "derapata"],
-              ["R", "reset"],
+              [`${keyName(bindings.accelerate)} / ↑`, "accelera"],
+              [`${keyName(bindings.brake)} / ↓`, "frena"],
+              [`${keyName(bindings.left)} ${keyName(bindings.right)} / ← →`, "sterza"],
+              [keyName(bindings.handbrake), "derapata"],
+              [keyName(bindings.reset), "reset"],
               ["Esc", "menu"],
             ].map(([k, d]) => (
               <span key={k} className="rounded-md border border-border/50 bg-card/70 px-3 py-1.5">
