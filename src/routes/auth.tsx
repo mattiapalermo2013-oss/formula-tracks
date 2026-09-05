@@ -7,13 +7,13 @@ export const Route = createFileRoute("/auth")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Accesso staff — Poly Rush" },
+      { title: "Accedi — Poly Rush" },
       {
         name: "description",
         content:
           "Area riservata di Poly Rush: accedi per gestire le 24 piste ufficiali del circuito low-poly.",
       },
-      { property: "og:title", content: "Accesso staff — Poly Rush" },
+      { property: "og:title", content: "Accedi — Poly Rush" },
       {
         property: "og:description",
         content: "Area riservata per la gestione delle 24 piste ufficiali di Poly Rush.",
@@ -71,10 +71,10 @@ function AuthPage() {
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
       <div className="w-full max-w-sm rounded-2xl border border-border/50 bg-card/80 p-7 backdrop-blur-md">
         <h1 className="text-2xl font-black uppercase tracking-tight text-foreground">
-          Accesso staff
+          Accedi
         </h1>
         <p className="mt-1 text-xs text-muted-foreground">
-          Solo l'amministratore può modificare le 24 piste ufficiali.
+          Salva i tuoi tempi e la tua posizione in classifica con email o Google.
         </p>
 
         <form onSubmit={submit} className="mt-6 space-y-3">

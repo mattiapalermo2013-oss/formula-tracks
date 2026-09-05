@@ -8,11 +8,13 @@ function TrackDetail({ slot, onBack }: { slot: number; onBack: () => void }) {
   const tracks = useTracksStore((s) => s.tracks);
   const startRace = useRaceStore((s) => s.startRace);
   const best = useBestTimesStore((s) => s.times)[slot]?.total;
-  const { entries, loading, error, name, setName, fetch } = useLeaderboardStore();
+  const { entries, loading, error, name, setName, fetch, userId, refreshAuth } =
+    useLeaderboardStore();
 
   useEffect(() => {
     void fetch(slot);
-  }, [slot, fetch]);
+    void refreshAuth();
+  }, [slot, fetch, refreshAuth]);
 
   const track = tracks.find((t) => t.slot === slot);
 
@@ -47,16 +49,32 @@ function TrackDetail({ slot, onBack }: { slot: number; onBack: () => void }) {
         Vai in pista
       </button>
 
-      <label className="mb-1 block text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-foreground/50">
-        Il tuo nome
-      </label>
-      <input
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder="Pilota"
-        maxLength={24}
-        className="mb-4 w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-sm font-semibold text-foreground outline-none focus:border-primary"
-      />
+      {userId ? (
+        <>
+          <label className="mb-1 block text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-foreground/50">
+            Il tuo nome in classifica
+          </label>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Pilota"
+            maxLength={24}
+            className="mb-4 w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-sm font-semibold text-foreground outline-none focus:border-primary"
+          />
+        </>
+      ) : (
+        <div className="mb-4 rounded-lg border border-border/60 px-3 py-3 text-center">
+          <p className="mb-2 text-xs text-muted-foreground">
+            Accedi con email o Google per salvare i progressi ed entrare in classifica
+          </p>
+          <a
+            href="/auth"
+            className="inline-block rounded-full border border-primary px-5 py-2 text-xs font-bold uppercase tracking-widest text-primary transition-colors hover:bg-primary/10"
+          >
+            Accedi
+          </a>
+        </div>
+      )}
 
       <h3 className="mb-2 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-foreground/50">
         Classifica mondiale
@@ -72,9 +90,10 @@ function TrackDetail({ slot, onBack }: { slot: number; onBack: () => void }) {
           <li
             key={e.id}
             className={`flex items-center gap-3 rounded-lg border px-3 py-2 ${
-              e.player_name === name.trim() ? "border-primary bg-primary/15" : "border-border/60"
+              e.user_id === userId ? "border-primary bg-primary/15" : "border-border/60"
             }`}
           >
+
             <span className="w-6 font-mono text-xs font-bold text-muted-foreground">{i + 1}</span>
             <span className="truncate text-sm font-semibold text-foreground">{e.player_name}</span>
             <span className="ml-auto shrink-0 font-mono text-xs tabular-nums text-primary">

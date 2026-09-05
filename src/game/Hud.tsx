@@ -162,8 +162,8 @@ export function Hud() {
   const [showLivery, setShowLivery] = useState(false);
   const [showTracks, setShowTracks] = useState(false);
   const lastRank = useLeaderboardStore((s) => s.lastRank);
-  const playerName = useLeaderboardStore((s) => s.name);
-  const setPlayerName = useLeaderboardStore((s) => s.setName);
+  const userId = useLeaderboardStore((s) => s.userId);
+  const refreshLeaderboardAuth = useLeaderboardStore((s) => s.refreshAuth);
   const fetchAll = useTracksStore((s) => s.fetchAll);
   const refreshAuth = useTracksStore((s) => s.refreshAuth);
   const isAdmin = useTracksStore((s) => s.isAdmin);
@@ -171,7 +171,8 @@ export function Hud() {
   useEffect(() => {
     void fetchAll();
     void refreshAuth();
-  }, [fetchAll, refreshAuth]);
+    void refreshLeaderboardAuth();
+  }, [fetchAll, refreshAuth, refreshLeaderboardAuth]);
 
   useEffect(() => {
     if (!lastSplit) {
@@ -349,7 +350,7 @@ export function Hud() {
             <p className="mt-2 text-sm text-muted-foreground">
               Record {bestLap ? formatTime(bestLap) : "--"}
             </p>
-            {playerName.trim() ? (
+            {userId ? (
               lastRank !== null && (
                 <p className="mt-4 font-mono text-sm font-bold uppercase tracking-widest text-foreground">
                   Posizione mondiale{" "}
@@ -359,17 +360,17 @@ export function Hud() {
             ) : (
               <div className="mt-4">
                 <p className="mb-2 text-xs text-muted-foreground">
-                  Inserisci un nome per entrare in classifica
+                  Accedi per salvare i tuoi progressi ed entrare in classifica
                 </p>
-                <input
-                  value={playerName}
-                  onChange={(e) => setPlayerName(e.target.value)}
-                  placeholder="Pilota"
-                  maxLength={24}
-                  className="pointer-events-auto w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-center text-sm font-semibold text-foreground outline-none focus:border-primary"
-                />
+                <a
+                  href="/auth"
+                  className="pointer-events-auto inline-block rounded-full border border-primary px-6 py-2 text-xs font-bold uppercase tracking-widest text-primary transition-colors hover:bg-primary/10"
+                >
+                  Accedi
+                </a>
               </div>
             )}
+
             <button
               className="pointer-events-auto mt-8 rounded-full bg-primary px-8 py-3 text-sm font-bold uppercase tracking-widest text-primary-foreground transition-transform hover:scale-105"
               onClick={startRace}
