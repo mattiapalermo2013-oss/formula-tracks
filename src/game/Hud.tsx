@@ -15,6 +15,7 @@ import { useTrackStore } from "./trackStore";
 import { TracksPanel } from "./TracksPanel";
 import { useLeaderboardStore } from "./leaderboardStore";
 import { ControlsPanel } from "./ControlsPanel";
+import { keyName, useControlsStore } from "./controlsStore";
 
 function Turntable() {
   const ref = useRef<THREE.Group>(null);
@@ -164,6 +165,7 @@ export function Hud() {
   const [showLivery, setShowLivery] = useState(false);
   const [showTracks, setShowTracks] = useState(false);
   const [showControls, setShowControls] = useState(false);
+  const bindings = useControlsStore((s) => s.bindings);
   const lastRank = useLeaderboardStore((s) => s.lastRank);
   const userId = useLeaderboardStore((s) => s.userId);
   const refreshLeaderboardAuth = useLeaderboardStore((s) => s.refreshAuth);
