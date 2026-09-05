@@ -6,12 +6,10 @@ import { useLeaderboardStore } from "./leaderboardStore";
 
 export type RacePhase = "ready" | "editing" | "racing" | "finished";
 
-const BEST_KEY = "polyrush-best-lap-v2";
-
+// Per-track personal best, read from the best-times store for the selected slot.
 function loadBest(): number | null {
-  if (typeof window === "undefined") return null;
-  const raw = localStorage.getItem(BEST_KEY);
-  return raw ? Number(raw) : null;
+  const slot = useTracksStore.getState().selected;
+  return useBestTimesStore.getState().bestFor(slot);
 }
 
 interface RaceStore {
@@ -49,7 +47,7 @@ export const useRaceStore = create<RaceStore>((set, get) => ({
   splits: [],
   lastSplit: null,
   openEditor: () => set({ phase: "editing", lap: 1, checkpoint: 0, elapsed: 0, speed: 0, raceTime: null, raceDelta: null, lastLap: null, splits: [], lastSplit: null }),
-  startRace: () => (useLeaderboardStore.getState().clearRank(), set({ phase: "racing", lap: 1, checkpoint: 0, elapsed: 0, raceTime: null, raceDelta: null, lastLap: null, splits: [], lastSplit: null })),
+  startRace: () => (useLeaderboardStore.getState().clearRank(), set({ phase: "racing", lap: 1, checkpoint: 0, elapsed: 0, raceTime: null, raceDelta: null, lastLap: null, splits: [], lastSplit: null, bestLap: loadBest() })),
   passCheckpoint: (index, time) => {
     const slot = useTracksStore.getState().selected;
     const ref = useBestTimesStore.getState().splitsFor(slot)[index];
@@ -66,11 +64,10 @@ export const useRaceStore = create<RaceStore>((set, get) => ({
     if (s.lap !== lap || s.checkpoint !== checkpoint) set({ lap, checkpoint });
   },
   completeLap: (lapTime) =>
-    set((s) => {
-      const bestLap = s.bestLap === null ? lapTime : Math.min(s.bestLap, lapTime);
-      if (typeof window !== "undefined") localStorage.setItem(BEST_KEY, String(bestLap));
-      return { lastLap: lapTime, bestLap };
-    }),
+    set((s) => ({
+      lastLap: lapTime,
+      bestLap: s.bestLap === null ? lapTime : Math.min(s.bestLap, lapTime),
+    })),
   finishRace: (total) => {
     const splits = get().splits;
     const slot = useTracksStore.getState().selected;
@@ -78,6 +75,7 @@ export const useRaceStore = create<RaceStore>((set, get) => ({
     set({ phase: "finished", raceTime: total, raceDelta: prevBest != null ? total - prevBest : null });
     if (slot != null) {
       useBestTimesStore.getState().record(slot, total, splits);
+      set({ bestLap: useBestTimesStore.getState().bestFor(slot) });
       void useLeaderboardStore.getState().submit(slot, total);
     }
   },
@@ -93,6 +91,7 @@ export const useRaceStore = create<RaceStore>((set, get) => ({
       raceDelta: null,
       splits: [],
       lastSplit: null,
+      bestLap: loadBest(),
     }),
 }));
 
