@@ -8,11 +8,13 @@ function TrackDetail({ slot, onBack }: { slot: number; onBack: () => void }) {
   const tracks = useTracksStore((s) => s.tracks);
   const startRace = useRaceStore((s) => s.startRace);
   const best = useBestTimesStore((s) => s.times)[slot]?.total;
-  const { entries, loading, error, name, setName, fetch } = useLeaderboardStore();
+  const { entries, loading, error, name, setName, fetch, userId, refreshAuth } =
+    useLeaderboardStore();
 
   useEffect(() => {
     void fetch(slot);
-  }, [slot, fetch]);
+    void refreshAuth();
+  }, [slot, fetch, refreshAuth]);
 
   const track = tracks.find((t) => t.slot === slot);
 
