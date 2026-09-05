@@ -83,14 +83,15 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
     const k = keys.current;
     const racing = store.phase === "racing";
 
+    const b = useControlsStore.getState().bindings;
     const forward = racing
-      ? (k.has("KeyW") || k.has("ArrowUp") ? 1 : 0) - (k.has("KeyS") || k.has("ArrowDown") ? 1 : 0)
+      ? (k.has(b.accelerate) || k.has("ArrowUp") ? 1 : 0) - (k.has(b.brake) || k.has("ArrowDown") ? 1 : 0)
       : 0;
     const steer = racing
-      ? (k.has("KeyA") || k.has("ArrowLeft") ? 1 : 0) - (k.has("KeyD") || k.has("ArrowRight") ? 1 : 0)
+      ? (k.has(b.left) || k.has("ArrowLeft") ? 1 : 0) - (k.has(b.right) || k.has("ArrowRight") ? 1 : 0)
       : 0;
-    const braking = racing && k.has("Space");
-    const resetPressed = k.has("KeyR");
+    const braking = racing && (b.handbrake !== "" && k.has(b.handbrake));
+    const resetPressed = b.reset !== "" && k.has(b.reset);
 
     if (resetPressed && !lastResetKey.current && racing) {
       // Full reset: back to the start line, stopped, with the clock cleared.
