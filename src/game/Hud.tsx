@@ -12,7 +12,6 @@ import {
 import { useTracksStore } from "./tracksStore";
 import { useTrackStore } from "./trackStore";
 import { TracksPanel } from "./TracksPanel";
-import { LeaderboardPanel } from "./LeaderboardPanel";
 import { useLeaderboardStore } from "./leaderboardStore";
 
 function Turntable() {
