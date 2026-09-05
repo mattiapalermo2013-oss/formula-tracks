@@ -161,7 +161,6 @@ export function Hud() {
   const [splitVisible, setSplitVisible] = useState(false);
   const [showLivery, setShowLivery] = useState(false);
   const [showTracks, setShowTracks] = useState(false);
-  const [showBoard, setShowBoard] = useState(false);
   const lastRank = useLeaderboardStore((s) => s.lastRank);
   const playerName = useLeaderboardStore((s) => s.name);
   const setPlayerName = useLeaderboardStore((s) => s.setName);
