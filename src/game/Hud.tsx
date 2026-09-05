@@ -287,21 +287,15 @@ export function Hud() {
           <p className="mt-3 max-w-md text-center text-sm text-muted-foreground">
             Un giro lanciato sul circuito sospeso. Curve strette, rampe e un cronometro che non perdona.
           </p>
-          <button
-            className="pointer-events-auto mt-8 rounded-full bg-primary px-10 py-4 text-base font-bold uppercase tracking-widest text-primary-foreground transition-transform hover:scale-105"
-            onClick={startRace}
-          >
-            Vai in pista
-          </button>
-          <div className="mt-3 flex flex-wrap justify-center gap-3">
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
             <button
-              className="pointer-events-auto rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
+              className="pointer-events-auto rounded-full bg-primary px-10 py-4 text-base font-bold uppercase tracking-widest text-primary-foreground transition-transform hover:scale-105"
               onClick={() => {
                 setShowLivery(false);
                 setShowTracks((v) => !v);
               }}
             >
-              Piste
+              Gioca
             </button>
             {isAdmin && (
               <button
