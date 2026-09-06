@@ -80,6 +80,10 @@ const en: Dict = {
     "Sign in with email or Google to save your progress and join the leaderboard",
   "track.signIn": "Sign in",
   "track.worldLeaderboard": "World leaderboard",
+  "ghost.watch": "Ghost",
+  "ghost.active": "Ghost: {name}",
+  "ghost.mine": "Use my best lap",
+  "ghost.none": "No recorded lap for this time",
   "track.loadingBoard": "Loading leaderboard…",
   "track.noTimes": "No times yet. Be the first!",
 
@@ -269,6 +273,10 @@ const it: Dict = {
     "Accedi con email o Google per salvare i progressi ed entrare in classifica",
   "track.signIn": "Accedi",
   "track.worldLeaderboard": "Classifica mondiale",
+  "ghost.watch": "Fantasma",
+  "ghost.active": "Fantasma: {name}",
+  "ghost.mine": "Usa il mio giro migliore",
+  "ghost.none": "Nessun giro registrato per questo tempo",
   "track.loadingBoard": "Carico la classifica…",
   "track.noTimes": "Nessun tempo ancora. Sii il primo!",
 

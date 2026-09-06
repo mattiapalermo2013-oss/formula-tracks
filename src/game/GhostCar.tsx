@@ -4,6 +4,7 @@ import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
 import { ghostClock, ghostInfo, ghostSample, type GhostFrame } from "./ghost";
 import { useRaceStore } from "./store";
+import { useLiveryStore } from "./liveryStore";
 
 /** Semi-transparent replay of the player's fastest lap. */
 export function GhostCar() {
@@ -50,9 +51,10 @@ export function GhostCar() {
     g.visible = ok;
     if (!ok) return;
     // Keep the owner's livery colour, washed out into a ghostly pastel.
-    if (lastColor.current !== ghostInfo.body) {
-      lastColor.current = ghostInfo.body;
-      const base = new THREE.Color(ghostInfo.body);
+    const bodyColor = ghostInfo.pinned ? ghostInfo.body : useLiveryStore.getState().body;
+    if (lastColor.current !== bodyColor) {
+      lastColor.current = bodyColor;
+      const base = new THREE.Color(bodyColor);
       const faded = base.clone().lerp(new THREE.Color("#eaf7ff"), 0.55);
       const glow = base.clone().lerp(new THREE.Color("#000000"), 0.55);
       for (const m of materials.current) {
