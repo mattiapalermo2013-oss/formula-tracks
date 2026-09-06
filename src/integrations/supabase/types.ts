@@ -17,7 +17,9 @@ export type Database = {
       lap_times: {
         Row: {
           created_at: string
+          ghost: Json | null
           id: string
+          livery: Json | null
           player_name: string
           slot: number
           time_ms: number
@@ -26,7 +28,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          ghost?: Json | null
           id?: string
+          livery?: Json | null
           player_name: string
           slot: number
           time_ms: number
@@ -35,7 +39,9 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          ghost?: Json | null
           id?: string
+          livery?: Json | null
           player_name?: string
           slot?: number
           time_ms?: number
