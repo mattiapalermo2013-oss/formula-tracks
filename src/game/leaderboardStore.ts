@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { supabase } from "@/integrations/supabase/client";
 
 const NAME_KEY = "polyrush-player-name";
+const PLAYER_KEY = "polyrush-player-id";
 
 export interface LapEntry {
   id: string;
@@ -12,9 +13,48 @@ export interface LapEntry {
   user_id: string;
 }
 
+function randomUuid(): string {
+  if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
+/** Stable anonymous player id kept in localStorage (one row per player per track). */
+function loadPlayerId(): string {
+  if (typeof window === "undefined") return "";
+  let id = localStorage.getItem(PLAYER_KEY);
+  if (!id) {
+    id = randomUuid();
+    localStorage.setItem(PLAYER_KEY, id);
+  }
+  return id;
+}
+
 function loadName(): string {
   if (typeof window === "undefined") return "";
   return localStorage.getItem(NAME_KEY) ?? "";
+}
+
+function guestName(): string {
+  return `Guest_${Math.floor(1000 + Math.random() * 9000)}`;
+}
+
+/** Reads the username from the CrazyGames SDK when the game runs on CrazyGames. */
+async function crazyGamesName(): Promise<string | null> {
+  if (typeof window === "undefined") return null;
+  try {
+    const sdk = (window as unknown as { CrazyGames?: { SDK?: unknown } }).CrazyGames?.SDK as
+      | { user?: { getUser?: () => Promise<{ username?: string } | null> } }
+      | undefined;
+    const user = await sdk?.user?.getUser?.();
+    const username = user?.username?.trim();
+    return username ? username.slice(0, 24) : null;
+  } catch {
+    return null;
+  }
 }
 
 interface LeaderboardState {
@@ -27,6 +67,7 @@ interface LeaderboardState {
   needsAuth: boolean;
   setName: (n: string) => void;
   refreshAuth: () => Promise<void>;
+  resolveIdentity: () => Promise<{ id: string; name: string }>;
   fetch: (slot: number) => Promise<void>;
   submit: (slot: number, seconds: number) => Promise<void>;
   rankFor: (slot: number, time_ms: number) => Promise<void>;
@@ -35,7 +76,7 @@ interface LeaderboardState {
 
 export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
   name: loadName(),
-  userId: null,
+  userId: loadPlayerId() || null,
   entries: [],
   loading: false,
   error: null,
@@ -50,14 +91,20 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
 
   clearRank: () => set({ lastRank: null }),
 
-  refreshAuth: async () => {
-    const { data } = await supabase.auth.getUser();
-    const user = data.user ?? null;
-    set({ userId: user?.id ?? null, needsAuth: false });
-    if (user && !get().name.trim()) {
-      const fallback = (user.email ?? "Pilota").split("@")[0]!.slice(0, 24);
-      get().setName(fallback);
+  /** No account needed: identity comes from CrazyGames or a local guest profile. */
+  resolveIdentity: async () => {
+    const id = loadPlayerId();
+    let name = get().name.trim();
+    if (!name) {
+      name = (await crazyGamesName()) ?? guestName();
+      get().setName(name);
     }
+    set({ userId: id, needsAuth: false });
+    return { id, name };
+  },
+
+  refreshAuth: async () => {
+    await get().resolveIdentity();
   },
 
   fetch: async (slot) => {
@@ -79,30 +126,17 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
     const time_ms = Math.round(seconds * 1000);
     if (time_ms <= 1000) return;
 
-    const { data: auth } = await supabase.auth.getUser();
-    const user = auth.user;
-    if (!user) {
-      set({ needsAuth: true, lastRank: null, userId: null });
-      return;
-    }
-    set({ userId: user.id, needsAuth: false });
-
-    let name = get().name.trim();
-    if (!name) {
-      name = (user.email ?? "Pilota").split("@")[0]!.slice(0, 24);
-      get().setName(name);
-    }
+    const { id, name } = await get().resolveIdentity();
 
     // one row per player per track: keep only the best time
     const { data: existing } = await supabase
       .from("lap_times")
       .select("id,time_ms")
       .eq("slot", slot)
-      .eq("user_id", user.id)
+      .eq("user_id", id)
       .maybeSingle();
 
     if (existing && existing.time_ms <= time_ms) {
-      // keep the previous (faster) record, just report the rank of that record
       await get().rankFor(slot, existing.time_ms);
       await get().fetch(slot);
       return;
@@ -111,7 +145,7 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
     const { error } = await supabase
       .from("lap_times")
       .upsert(
-        { slot, player_name: name, time_ms, user_id: user.id },
+        { slot, player_name: name, time_ms, user_id: id },
         { onConflict: "slot,user_id" },
       );
     if (error) {
