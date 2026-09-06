@@ -5,14 +5,18 @@ import { useBestTimesStore } from "./bestTimesStore";
 import { useLeaderboardStore } from "./leaderboardStore";
 import { useStaffStore } from "./staffStore";
 import { useT } from "./i18n";
+import { ghostInfo, ghostUsePersonal } from "./ghost";
+import { useLiveryStore } from "./liveryStore";
 
 function TrackDetail({ slot, onBack }: { slot: number; onBack: () => void }) {
   const t = useT();
   const tracks = useTracksStore((s) => s.tracks);
   const startRace = useRaceStore((s) => s.startRace);
   const best = useBestTimesStore((s) => s.times)[slot]?.total;
-  const { entries, loading, error, name, setName, fetch, userId, refreshAuth } =
+  const { entries, loading, error, name, setName, fetch, userId, refreshAuth, loadGhost } =
     useLeaderboardStore();
+  const [ghostName, setGhostName] = useState<string | null>(ghostInfo.pinned ? ghostInfo.label : null);
+  const [ghostError, setGhostError] = useState(false);
 
   useEffect(() => {
     void fetch(slot);
@@ -44,6 +48,24 @@ function TrackDetail({ slot, onBack }: { slot: number; onBack: () => void }) {
           {best != null ? formatTime(best) : "--:--"}
         </span>
       </div>
+
+      <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-border/60 px-3 py-2">
+        <span className="truncate text-xs text-muted-foreground">
+          {ghostName ? t("ghost.active").replace("{name}", ghostName) : t("ghost.mine")}
+        </span>
+        {ghostName && (
+          <button
+            onClick={() => {
+              ghostUsePersonal(useLiveryStore.getState());
+              setGhostName(null);
+            }}
+            className="shrink-0 rounded-full border border-border/60 px-3 py-1 text-[0.65rem] font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
+          >
+            {t("ghost.mine")}
+          </button>
+        )}
+      </div>
+      {ghostError && <p className="mb-3 text-xs text-destructive">{t("ghost.none")}</p>}
 
       <button
         onClick={startRace}
@@ -102,6 +124,23 @@ function TrackDetail({ slot, onBack }: { slot: number; onBack: () => void }) {
             <span className="ml-auto shrink-0 font-mono text-xs tabular-nums text-primary">
               {formatTime(e.time_ms / 1000)}
             </span>
+            {e.hasGhost && (
+              <button
+                onClick={async () => {
+                  setGhostError(false);
+                  const ok = await loadGhost(e);
+                  if (ok) setGhostName(e.player_name);
+                  else setGhostError(true);
+                }}
+                className={`shrink-0 rounded-full border px-2.5 py-1 text-[0.6rem] font-bold uppercase tracking-widest transition-colors ${
+                  ghostName === e.player_name
+                    ? "border-primary bg-primary/20 text-primary"
+                    : "border-border/60 text-muted-foreground hover:bg-foreground/10"
+                }`}
+              >
+                {t("ghost.watch")}
+              </button>
+            )}
           </li>
         ))}
       </ol>

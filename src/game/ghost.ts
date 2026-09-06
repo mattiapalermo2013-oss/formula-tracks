@@ -16,6 +16,15 @@ let best: GhostFrame[] = [];
 let bestTime: number | null = null;
 let lastSample = -1;
 
+// Who the ghost belongs to. When a leaderboard ghost is loaded it stays pinned
+// until the player clears it, so their own laps don't overwrite it.
+export const ghostInfo = {
+  label: null as string | null,
+  pinned: false,
+  body: "#e63946",
+  accent: "#f8f9fa",
+};
+
 // Current lap time of the player, used to drive the playback.
 export const ghostClock = { t: 0 };
 
@@ -26,10 +35,11 @@ export function ghostResetLap() {
 
 export function ghostClearAll() {
   recording = [];
-  best = [];
-  bestTime = null;
   lastSample = -1;
   ghostClock.t = 0;
+  if (ghostInfo.pinned) return; // keep the leaderboard ghost the player picked
+  best = [];
+  bestTime = null;
 }
 
 export function ghostRecord(t: number, x: number, y: number, z: number, yaw: number) {
@@ -41,11 +51,57 @@ export function ghostRecord(t: number, x: number, y: number, z: number, yaw: num
 
 /** Called when a lap closes. Keeps the recording if it is the fastest so far. */
 export function ghostCommitLap(lapTime: number, valid: boolean) {
-  if (valid && recording.length > 4 && (bestTime === null || lapTime < bestTime)) {
+  if (valid && recording.length > 4 && !ghostInfo.pinned && (bestTime === null || lapTime < bestTime)) {
     bestTime = lapTime;
     best = recording;
   }
   ghostResetLap();
+}
+
+/** Flat, rounded encoding of the fastest lap for storage in the leaderboard. */
+export function ghostFlat(): number[] | null {
+  if (best.length < 4) return null;
+  const out: number[] = [];
+  for (const f of best) {
+    out.push(
+      Math.round(f.t * 1000) / 1000,
+      Math.round(f.x * 100) / 100,
+      Math.round(f.y * 100) / 100,
+      Math.round(f.z * 100) / 100,
+      Math.round(f.yaw * 1000) / 1000,
+    );
+  }
+  return out;
+}
+
+/** Loads a ghost recorded by another player (from the leaderboard). */
+export function ghostSetExternal(
+  flat: number[],
+  label: string,
+  colors?: { body?: string; accent?: string },
+) {
+  const frames: GhostFrame[] = [];
+  for (let i = 0; i + 4 < flat.length; i += 5) {
+    frames.push({ t: flat[i]!, x: flat[i + 1]!, y: flat[i + 2]!, z: flat[i + 3]!, yaw: flat[i + 4]! });
+  }
+  if (frames.length < 2) return false;
+  best = frames;
+  bestTime = frames[frames.length - 1]!.t;
+  ghostInfo.label = label;
+  ghostInfo.pinned = true;
+  if (colors?.body) ghostInfo.body = colors.body;
+  if (colors?.accent) ghostInfo.accent = colors.accent;
+  return true;
+}
+
+/** Drops a pinned leaderboard ghost and goes back to recording your own laps. */
+export function ghostUsePersonal(colors?: { body?: string; accent?: string }) {
+  best = [];
+  bestTime = null;
+  ghostInfo.label = null;
+  ghostInfo.pinned = false;
+  if (colors?.body) ghostInfo.body = colors.body;
+  if (colors?.accent) ghostInfo.accent = colors.accent;
 }
 
 export function ghostHasData() {
