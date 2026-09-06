@@ -336,6 +336,20 @@ const it: Dict = {
   "auth.back": "Torna al gioco",
   "auth.created": "Account creato. Controlla la mail se richiesto, poi accedi.",
   "auth.googleFailed": "Accesso con Google non riuscito.",
+
+  // staff
+  "staff.title": "Accesso staff",
+  "staff.password": "Password staff",
+  "staff.confirm": "Conferma",
+  "staff.close": "Chiudi",
+  "staff.wrong": "Password errata",
+  "staff.unlocked": "Modalità admin sbloccata",
+  "staff.lock": "Blocca",
+  "staff.resetTrack": "Azzera classifica (questa pista)",
+  "staff.resetAll": "Azzera classifica (tutte le piste)",
+  "staff.resetLocal": "Cancella i miei record locali",
+  "staff.deleted": "Tempi eliminati:",
+  "staff.localCleared": "Record locali cancellati",
 };
 
 const DICTS: Record<Lang, Dict> = { en, it };
