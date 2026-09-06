@@ -12,7 +12,7 @@ import { pushSkid, clearSkids } from "./skidmarks";
 import { updateEngine, updateSkid, unlockAudio, stopEngineSound } from "./audio";
 
 // Feel constants — tune these, not the model.
-const ACCEL = 18; // sharper F1 feel: 0-100 km/h in ~1.7s, 0-300 in ~6.5s
+const ACCEL = 20; // very sharp F1 launch
 const BRAKE = 26;
 const DRAG = 0.02;
 const TURN = 1.3;
