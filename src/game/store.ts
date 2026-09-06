@@ -3,6 +3,7 @@ import { LAPS_TO_WIN } from "./track";
 import { useTracksStore } from "./tracksStore";
 import { useBestTimesStore } from "./bestTimesStore";
 import { useLeaderboardStore } from "./leaderboardStore";
+import { submitCrazyScore } from "./crazygames";
 
 export type RacePhase = "ready" | "editing" | "racing" | "finished";
 
@@ -77,6 +78,7 @@ export const useRaceStore = create<RaceStore>((set, get) => ({
       useBestTimesStore.getState().record(slot, total, splits);
       set({ bestLap: useBestTimesStore.getState().bestFor(slot) });
       void useLeaderboardStore.getState().submit(slot, total);
+      void submitCrazyScore(total);
     }
   },
   reset: () =>

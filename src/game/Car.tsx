@@ -175,8 +175,11 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
       if (into < 0) {
         s.vx -= nx * into;
         s.vz -= nz * into;
-        s.vx *= 0.94;
-        s.vz *= 0.94;
+        // Harder hits scrub off much more speed.
+        const impact = -into;
+        const wallDamping = Math.max(0.2, 0.94 - impact * 0.06);
+        s.vx *= wallDamping;
+        s.vz *= wallDamping;
       }
     }
 
