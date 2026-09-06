@@ -117,11 +117,12 @@ export function Editor() {
               }}
               className="mt-2 w-full rounded-full border border-primary bg-primary/15 px-6 py-2.5 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-primary/25 disabled:opacity-40"
             >
-              {saving ? "Salvo…" : "Salva pista"}
+              {saving ? t("editor.saving") : t("editor.save")}
             </button>
             {savedAt && !error && (
-              <p className="mt-2 text-[0.7rem] text-muted-foreground">Pista salvata.</p>
+              <p className="mt-2 text-[0.7rem] text-muted-foreground">{t("editor.saved")}</p>
             )}
+
             {error && <p className="mt-2 text-[0.7rem] text-destructive">{error}</p>}
           </div>
         )}
