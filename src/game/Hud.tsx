@@ -294,7 +294,7 @@ export function Hud() {
             Arcade racing
           </p>
           <h1 className="mt-3 text-4xl font-black tracking-tight text-foreground sm:text-7xl">
-            FORMULA-TRACK
+            FORMULA TRACK
           </h1>
           <p className="mt-3 max-w-md text-center text-sm text-muted-foreground">
             Un giro lanciato sul circuito sospeso. Curve strette, rampe e un cronometro che non perdona.
