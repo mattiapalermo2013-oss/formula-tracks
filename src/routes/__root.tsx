@@ -92,6 +92,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
+    scripts: [
+      { src: "https://sdk.crazygames.com/crazygames-sdk-v2.js" },
+    ],
   }),
   shellComponent: RootShell,
   component: RootComponent,
