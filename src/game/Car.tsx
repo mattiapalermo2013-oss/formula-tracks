@@ -8,6 +8,7 @@ import { useRaceStore } from "./store";
 import { CarModel } from "./CarModel";
 import { useControlsStore } from "./controlsStore";
 import { touchInput } from "./touchControls";
+import { pushSkid, clearSkids } from "./skidmarks";
 
 // Feel constants — tune these, not the model.
 const ACCEL = 34;
