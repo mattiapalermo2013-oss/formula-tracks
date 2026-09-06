@@ -167,6 +167,7 @@ export function Hud() {
   const t = useT();
   const { phase, lap, checkpoint, speed, elapsed, lastLap, bestLap, sessionBest, lapBanner, pitRemaining, pitReadyKey, raceTime, raceDelta, lastSplit, startRace, reset, openEditor } =
     useRaceStore();
+  const units = useSettingsStore((s) => s.units);
   const [bannerVisible, setBannerVisible] = useState(false);
   const [boostVisible, setBoostVisible] = useState(false);
   const gates = useTrackStore((s) => s.track.checkpoints.length);
@@ -348,9 +349,7 @@ export function Hud() {
       {phase === "ready" && (
         <div className="pointer-events-auto absolute inset-0 flex flex-col items-center overflow-y-auto bg-background/70 px-3 py-6 backdrop-blur-sm">
           <div className="my-auto flex flex-col items-center">
-          <div className="mb-4 flex items-center gap-3">
-            <LanguageSwitch />
-          </div>
+          
           <p className="text-xs font-semibold uppercase tracking-[0.45em] text-primary">
             {t("menu.tagline")}
           </p>
@@ -397,7 +396,7 @@ export function Hud() {
                 setShowControls((v) => !v);
               }}
             >
-              {t("menu.controls")}
+              {t("menu.settings")}
             </button>
           </div>
           {showTracks && <TracksPanel onClose={() => setShowTracks(false)} />}
