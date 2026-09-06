@@ -53,7 +53,7 @@ export async function submitCrazyScore(scoreSeconds: number): Promise<void> {
   if (!sdk) return;
 
   try {
-    const key = import.meta.env.VITE_CRAZYGAMES_ENCRYPTION_KEY as string | undefined;
+    const key = import.meta.env["VITE_CRAZYGAMES_ENCRYPTION_KEY"] as string | undefined;
     if (sdk.user?.submitScore && key) {
       const encryptedScore = await encryptScore(scoreSeconds, key);
       await sdk.user.submitScore({ encryptedScore });
