@@ -23,7 +23,7 @@ export function Editor() {
 
   return (
     <div className="pointer-events-none fixed inset-0 z-20 select-none">
-      <div className="pointer-events-auto absolute left-4 top-4 w-72 max-h-[calc(100vh-2rem)] overflow-y-auto overscroll-contain rounded-2xl border border-border/40 bg-card/90 p-4 backdrop-blur-md">
+      <div className="pointer-events-auto absolute left-2 right-2 top-2 max-h-[calc(100vh-6rem)] overflow-y-auto overscroll-contain rounded-2xl border border-border/40 bg-card/90 p-4 backdrop-blur-md sm:left-4 sm:right-auto sm:top-4 sm:w-72 sm:max-h-[calc(100vh-2rem)]">
         <h2 className="text-lg font-black uppercase tracking-tight text-foreground">
           Costruisci la pista
         </h2>
@@ -145,7 +145,7 @@ export function Editor() {
         </div>
       </div>
 
-      <p className="absolute right-4 top-4 rounded-lg border border-border/40 bg-card/80 px-3 py-2 text-xs text-muted-foreground backdrop-blur-md">
+      <p className="absolute bottom-16 right-2 rounded-lg border border-border/40 bg-card/80 px-3 py-2 text-xs text-muted-foreground backdrop-blur-md sm:bottom-auto sm:right-4 sm:top-4">
         Trascina per ruotare · rotella per zoom
       </p>
     </div>

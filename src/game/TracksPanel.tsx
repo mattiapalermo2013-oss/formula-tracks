@@ -116,7 +116,7 @@ export function TracksPanel({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      className="pointer-events-auto mt-6 w-full max-w-md overflow-y-auto overscroll-contain rounded-2xl border border-border/50 bg-card/90 p-6 backdrop-blur-md"
+      className="pointer-events-auto mt-6 w-full max-w-md overflow-y-auto overscroll-contain rounded-2xl border border-border/50 bg-card/90 p-4 backdrop-blur-md sm:p-6"
       style={{ maxHeight: "min(70vh, 640px)" }}
     >
       {detail != null ? (
