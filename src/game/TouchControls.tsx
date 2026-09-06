@@ -27,8 +27,12 @@ function TouchButton({
       className={`pointer-events-auto flex touch-none select-none items-center justify-center rounded-2xl border border-border/50 bg-card/70 text-foreground backdrop-blur-md active:border-primary active:bg-primary/25 ${className}`}
       onPointerDown={(e) => {
         e.preventDefault();
-        e.currentTarget.setPointerCapture(e.pointerId);
         press(true);
+        try {
+          e.currentTarget.setPointerCapture(e.pointerId);
+        } catch {
+          // synthetic or already-released pointers: ignore
+        }
       }}
       onPointerUp={() => press(false)}
       onPointerCancel={() => press(false)}
