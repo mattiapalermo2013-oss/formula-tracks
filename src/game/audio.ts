@@ -1,18 +1,25 @@
-/** Lightweight WebAudio engine + tire-screech synthesizer (no asset files). */
+/** WebAudio F1-style engine + tire-screech synthesizer (no asset files). */
 
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
 
 // engine
-let engOsc1: OscillatorNode | null = null;
-let engOsc2: OscillatorNode | null = null;
+type Partial_ = { osc: OscillatorNode; gain: GainNode; mult: number };
+let partials: Partial_[] = [];
+let engFilter: BiquadFilterNode | null = null;
 let engGain: GainNode | null = null;
+let engNoiseGain: GainNode | null = null;
 
 // skid
 let skidSrc: AudioBufferSourceNode | null = null;
 let skidGain: GainNode | null = null;
 
 let enabled = true;
+
+// gearbox state
+const GEARS = 8;
+let gear = 1;
+let shiftUntil = 0;
 
 function noiseBuffer(c: AudioContext): AudioBuffer {
   const len = c.sampleRate * 2;
@@ -34,24 +41,62 @@ function ensure(): boolean {
     master.gain.value = 0.5;
     master.connect(ctx.destination);
 
-    // Engine: two detuned saw oscillators through a low-pass filter.
-    const filter = ctx.createBiquadFilter();
-    filter.type = "lowpass";
-    filter.frequency.value = 1400;
     engGain = ctx.createGain();
     engGain.gain.value = 0;
-    engOsc1 = ctx.createOscillator();
-    engOsc1.type = "sawtooth";
-    engOsc1.frequency.value = 60;
-    engOsc2 = ctx.createOscillator();
-    engOsc2.type = "square";
-    engOsc2.frequency.value = 90;
-    engOsc1.connect(filter);
-    engOsc2.connect(filter);
-    filter.connect(engGain);
     engGain.connect(master);
-    engOsc1.start();
-    engOsc2.start();
+
+    // Slight distortion gives the harshness of a real engine instead of a pure tone.
+    const shaper = ctx.createWaveShaper();
+    const curve = new Float32Array(1024);
+    for (let i = 0; i < 1024; i++) {
+      const x = (i / 1023) * 2 - 1;
+      curve[i] = Math.tanh(x * 2.2);
+    }
+    shaper.curve = curve;
+    shaper.connect(engGain);
+
+    engFilter = ctx.createBiquadFilter();
+    engFilter.type = "lowpass";
+    engFilter.frequency.value = 1600;
+    engFilter.Q.value = 0.8;
+    engFilter.connect(shaper);
+
+    // Harmonic stack: firing order partials, slightly detuned = mechanical, not synthy.
+    const stack: Array<[number, number, OscillatorType]> = [
+      [0.5, 0.5, "sawtooth"],
+      [1, 1, "sawtooth"],
+      [1.5, 0.35, "square"],
+      [2, 0.45, "sawtooth"],
+      [3, 0.22, "sawtooth"],
+      [4.5, 0.14, "square"],
+    ];
+    partials = stack.map(([mult, amp, type]) => {
+      const osc = ctx!.createOscillator();
+      osc.type = type;
+      osc.frequency.value = 80 * mult;
+      osc.detune.value = (Math.random() - 0.5) * 14;
+      const g = ctx!.createGain();
+      g.gain.value = amp;
+      osc.connect(g);
+      g.connect(engFilter!);
+      osc.start();
+      return { osc, gain: g, mult };
+    });
+
+    // Air/intake noise layer.
+    const noiseSrc = ctx.createBufferSource();
+    noiseSrc.buffer = noiseBuffer(ctx);
+    noiseSrc.loop = true;
+    const nf = ctx.createBiquadFilter();
+    nf.type = "bandpass";
+    nf.frequency.value = 900;
+    nf.Q.value = 0.7;
+    engNoiseGain = ctx.createGain();
+    engNoiseGain.gain.value = 0;
+    noiseSrc.connect(nf);
+    nf.connect(engNoiseGain);
+    engNoiseGain.connect(engFilter);
+    noiseSrc.start();
 
     // Skid: band-passed white noise loop.
     const bp = ctx.createBiquadFilter();
@@ -86,23 +131,50 @@ export function isAudioEnabled() {
   return enabled;
 }
 
+/** Which gear a given speed ratio sits in, with a little hysteresis. */
+function gearFor(r: number): number {
+  const g = Math.min(GEARS, Math.floor(r * GEARS) + 1);
+  return Math.max(1, g);
+}
+
 /**
  * @param speedRatio 0..1 of top speed
  * @param throttle 0..1 how hard the player is on the gas
  * @param active engine running (racing)
  */
 export function updateEngine(speedRatio: number, throttle: number, active: boolean) {
-  if (!ensure() || !ctx || !engOsc1 || !engOsc2 || !engGain) return;
+  if (!ensure() || !ctx || !engGain || !engFilter) return;
   const t = ctx.currentTime;
   if (!active) {
     engGain.gain.setTargetAtTime(0, t, 0.15);
+    if (engNoiseGain) engNoiseGain.gain.setTargetAtTime(0, t, 0.15);
+    gear = 1;
     return;
   }
+
   const r = Math.max(0, Math.min(1, speedRatio));
-  const base = 55 + r * 320 + throttle * 30;
-  engOsc1.frequency.setTargetAtTime(base, t, 0.05);
-  engOsc2.frequency.setTargetAtTime(base * 1.51, t, 0.05);
-  engGain.gain.setTargetAtTime(0.05 + 0.11 * r + 0.05 * throttle, t, 0.08);
+  const nextGear = gearFor(r);
+  if (nextGear !== gear) {
+    // Upshift/downshift: momentary cut, like an F1 seamless-shift blip.
+    shiftUntil = t + (nextGear > gear ? 0.08 : 0.06);
+    gear = nextGear;
+  }
+  const shifting = t < shiftUntil;
+
+  // Revs climb inside each gear and drop on the upshift — that's the "cambiata".
+  const span = 1 / GEARS;
+  const inGear = Math.min(1, Math.max(0, (r - (gear - 1) * span) / span));
+  const rpm = 0.28 + inGear * 0.72; // 0..1 normalized rev range
+
+  const base = 42 + rpm * 165 + throttle * 12;
+  for (const p of partials) {
+    p.osc.frequency.setTargetAtTime(base * p.mult, t, shifting ? 0.02 : 0.045);
+  }
+  engFilter.frequency.setTargetAtTime(700 + rpm * 4200 + r * 1200, t, 0.06);
+
+  const loud = 0.05 + 0.12 * rpm + 0.05 * throttle + 0.04 * r;
+  engGain.gain.setTargetAtTime(shifting ? loud * 0.25 : loud, t, shifting ? 0.012 : 0.07);
+  if (engNoiseGain) engNoiseGain.gain.setTargetAtTime(0.02 + 0.06 * r, t, 0.1);
 }
 
 export function updateSkid(intensity: number) {
