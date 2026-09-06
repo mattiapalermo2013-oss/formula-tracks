@@ -4,6 +4,7 @@ import { Environment, Lightformer } from "@react-three/drei";
 import * as THREE from "three";
 import { TrackMesh } from "./TrackMesh";
 import { Car } from "./Car";
+import { GhostCar } from "./GhostCar";
 import { SkidMarks } from "./SkidMarks";
 import { ChaseCamera } from "./ChaseCamera";
 import { EditorCamera } from "./EditorCamera";
@@ -63,6 +64,7 @@ export function GameScene() {
       <SkidMarks />
       <Suspense fallback={null}>
         <Car groupRef={carRef} />
+        <GhostCar />
       </Suspense>
       {editing ? <EditorCamera /> : <ChaseCamera targetRef={carRef} />}
     </Canvas>

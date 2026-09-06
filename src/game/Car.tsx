@@ -10,6 +10,7 @@ import { useControlsStore } from "./controlsStore";
 import { touchInput } from "./touchControls";
 import { pushSkid, clearSkids } from "./skidmarks";
 import { updateEngine, updateSkid, unlockAudio, stopEngineSound } from "./audio";
+import { ghostRecord, ghostResetLap, ghostCommitLap, ghostClearAll } from "./ghost";
 
 // Feel constants — tune these, not the model.
 const ACCEL = 20; // very sharp F1 launch
@@ -85,6 +86,7 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
     });
     lastStoreSync.current = -1;
     clearSkids();
+    ghostClearAll();
   }, [phase, track]);
 
   // Browsers only allow audio after a user gesture.
@@ -129,6 +131,7 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
       });
       lastStoreSync.current = -1;
       clearSkids();
+      ghostResetLap();
       store.setTelemetry(0, 0);
     }
     lastResetKey.current = resetPressed;
@@ -227,6 +230,7 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
       if (s.trackIdx < 20 && s.checkpoint >= trk.checkpoints.length) {
         const lapTime = s.elapsed;
         const outLap = s.lap === 1;
+        ghostCommitLap(lapTime, !outLap);
         store.completeLap(lapTime, outLap);
         s.lap += 1;
         s.checkpoint = 0;
@@ -265,6 +269,8 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
       }
       store.setProgress(s.lap, s.checkpoint);
     }
+
+    if (racing) ghostRecord(s.elapsed, s.x, s.y, s.z, s.yaw);
 
     const g = groupRef.current;
     if (g) {
