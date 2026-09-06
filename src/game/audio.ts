@@ -156,7 +156,7 @@ export function updateEngine(speedRatio: number, throttle: number, active: boole
   const nextGear = gearFor(r);
   if (nextGear !== gear) {
     // Upshift/downshift: momentary cut, like an F1 seamless-shift blip.
-    shiftUntil = t + (nextGear > gear ? 0.08 : 0.06);
+    shiftUntil = t + (nextGear > gear ? 0.18 : 0.14);
     gear = nextGear;
   }
   const shifting = t < shiftUntil;
