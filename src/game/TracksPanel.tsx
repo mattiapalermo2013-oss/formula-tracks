@@ -3,6 +3,7 @@ import { useTracksStore } from "./tracksStore";
 import { formatTime, useRaceStore } from "./store";
 import { useBestTimesStore } from "./bestTimesStore";
 import { useLeaderboardStore } from "./leaderboardStore";
+import { useStaffStore } from "./staffStore";
 import { useT } from "./i18n";
 
 function TrackDetail({ slot, onBack }: { slot: number; onBack: () => void }) {
@@ -110,8 +111,8 @@ function TrackDetail({ slot, onBack }: { slot: number; onBack: () => void }) {
 
 export function TracksPanel({ onClose }: { onClose: () => void }) {
   const t = useT();
-  const { tracks, selected, select, loading, error, isAdmin, email, claimAdmin, signOut } =
-    useTracksStore();
+  const { tracks, selected, select, loading, error } = useTracksStore();
+  const isAdmin = useStaffStore((s) => s.unlocked);
   const openEditor = useRaceStore((s) => s.openEditor);
   const bestTimes = useBestTimesStore((s) => s.times);
   const clearAllTimes = useBestTimesStore((s) => s.clearAll);
