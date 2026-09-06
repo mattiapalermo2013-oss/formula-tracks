@@ -139,7 +139,9 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
     let vLat = s.vx * rdx + s.vz * rdz;
 
     if (s.grounded) {
-      vLong += forward * ACCEL * dt;
+      // Real-F1 power curve: full shove at low speed, fading toward top speed.
+      const powerFactor = Math.max(0.12, 1 - Math.pow(Math.max(vLong, 0) / MAX_SPEED, 0.9));
+      vLong += forward * ACCEL * (forward > 0 ? powerFactor : 1) * dt;
       if (braking) vLong -= Math.sign(vLong) * BRAKE * dt;
       vLong -= vLong * DRAG * dt;
       vLong = THREE.MathUtils.clamp(vLong, -8, MAX_SPEED);
