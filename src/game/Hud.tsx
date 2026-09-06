@@ -302,18 +302,6 @@ export function Hud() {
           <div className="my-auto flex flex-col items-center">
           <div className="mb-4 flex items-center gap-3">
             <LanguageSwitch />
-            {userId ? (
-              <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">
-                {t("menu.signedIn")}
-              </span>
-            ) : (
-              <Link
-                to="/auth"
-                className="pointer-events-auto rounded-full border border-primary px-6 py-2 text-xs font-bold uppercase tracking-widest text-primary transition-colors hover:bg-primary/10"
-              >
-                {t("menu.signIn")}
-              </Link>
-            )}
           </div>
           <p className="text-xs font-semibold uppercase tracking-[0.45em] text-primary">
             {t("menu.tagline")}
