@@ -59,26 +59,6 @@ const PATTERNS: { id: LiveryPattern; label: string }[] = [
   { id: "split", label: "livery.split" },
 ];
 
-function LanguageSwitch() {
-  const lang = useI18nStore((s) => s.lang);
-  const setLang = useI18nStore((s) => s.setLang);
-  const langs: Lang[] = ["en", "it"];
-  return (
-    <div className="pointer-events-auto flex gap-1 rounded-full border border-border/60 bg-card/70 p-1">
-      {langs.map((l) => (
-        <button
-          key={l}
-          onClick={() => setLang(l)}
-          className={`rounded-full px-3 py-1 text-[0.65rem] font-bold uppercase tracking-widest transition-colors ${
-            lang === l ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-foreground/10"
-          }`}
-        >
-          {l}
-        </button>
-      ))}
-    </div>
-  );
-}
 
 function Swatches({
   colors,
