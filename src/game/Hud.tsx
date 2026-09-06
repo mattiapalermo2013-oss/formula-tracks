@@ -397,25 +397,10 @@ export function Hud() {
             <p className="mt-2 text-sm text-muted-foreground">
               {t("hud.record")} {bestLap ? formatTime(bestLap) : "--"}
             </p>
-            {userId ? (
-              lastRank !== null && (
-                <p className="mt-4 font-mono text-sm font-bold uppercase tracking-widest text-foreground">
-                  {t("hud.worldRank")}{" "}
-                  <span className="text-primary">#{lastRank}</span>
-                </p>
-              )
-            ) : (
-              <div className="mt-4">
-                <p className="mb-2 text-xs text-muted-foreground">
-                  {t("hud.signInPrompt")}
-                </p>
-                <a
-                  href="/auth"
-                  className="pointer-events-auto inline-block rounded-full border border-primary px-6 py-2 text-xs font-bold uppercase tracking-widest text-primary transition-colors hover:bg-primary/10"
-                >
-                  {t("menu.signIn")}
-                </a>
-              </div>
+            {lastRank !== null && (
+              <p className="mt-4 font-mono text-sm font-bold uppercase tracking-widest text-foreground">
+                {t("hud.worldRank")} <span className="text-primary">#{lastRank}</span>
+              </p>
             )}
 
             <button
