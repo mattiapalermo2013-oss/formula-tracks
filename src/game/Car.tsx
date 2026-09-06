@@ -140,7 +140,8 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
 
     if (s.grounded) {
       // Real-F1 power curve: full shove at low speed, fading toward top speed.
-      const powerFactor = Math.max(0.12, 1 - Math.pow(Math.max(vLong, 0) / MAX_SPEED, 0.9));
+      const vr = Math.max(vLong, 0) / MAX_SPEED;
+      const powerFactor = Math.max(0, 1 - vr * vr * vr);
       vLong += forward * ACCEL * (forward > 0 ? powerFactor : 1) * dt;
       if (braking) vLong -= Math.sign(vLong) * BRAKE * dt;
       vLong -= vLong * DRAG * dt;
