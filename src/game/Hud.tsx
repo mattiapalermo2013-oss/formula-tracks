@@ -15,6 +15,7 @@ import { useTrackStore } from "./trackStore";
 import { TracksPanel } from "./TracksPanel";
 import { useLeaderboardStore } from "./leaderboardStore";
 import { ControlsPanel } from "./ControlsPanel";
+import { RotateOverlay, TouchControls } from "./TouchControls";
 import { keyName, useControlsStore } from "./controlsStore";
 
 function Turntable() {
@@ -255,6 +256,13 @@ export function Hud() {
                 </div>
               )}
             </div>
+          )}
+
+          {phase === "racing" && (
+            <>
+              <TouchControls />
+              <RotateOverlay />
+            </>
           )}
 
           {lastLap !== null && phase === "racing" && (
