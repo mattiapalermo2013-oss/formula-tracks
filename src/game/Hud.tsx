@@ -184,8 +184,10 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
 
 export function Hud() {
   const t = useT();
-  const { phase, checkpoint, speed, elapsed, lastLap, bestLap, raceTime, raceDelta, lastSplit, startRace, reset, openEditor } =
+  const { phase, lap, checkpoint, speed, elapsed, lastLap, bestLap, sessionBest, lapBanner, pitRemaining, pitReadyKey, raceTime, raceDelta, lastSplit, startRace, reset, openEditor } =
     useRaceStore();
+  const [bannerVisible, setBannerVisible] = useState(false);
+  const [boostVisible, setBoostVisible] = useState(false);
   const gates = useTrackStore((s) => s.track.checkpoints.length);
   const [splitVisible, setSplitVisible] = useState(false);
   const [showLivery, setShowLivery] = useState(false);
@@ -215,6 +217,23 @@ export function Hud() {
   }, [lastSplit?.key]);
 
   useEffect(() => {
+    if (!lapBanner) {
+      setBannerVisible(false);
+      return;
+    }
+    setBannerVisible(true);
+    const id = window.setTimeout(() => setBannerVisible(false), 4000);
+    return () => window.clearTimeout(id);
+  }, [lapBanner?.key]);
+
+  useEffect(() => {
+    if (!pitReadyKey) return;
+    setBoostVisible(true);
+    const id = window.setTimeout(() => setBoostVisible(false), 1500);
+    return () => window.clearTimeout(id);
+  }, [pitReadyKey]);
+
+  useEffect(() => {
     if (phase !== "racing") return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") useRaceStore.getState().reset();
@@ -231,6 +250,11 @@ export function Hud() {
           <div className="absolute left-2 top-2 flex gap-3 rounded-xl border border-border/40 bg-card/80 px-3 py-2 backdrop-blur-md sm:left-4 sm:top-4 sm:gap-5 sm:px-5 sm:py-3">
             <Stat label={t("hud.time")} value={formatTime(elapsed)} />
             <Stat label={t("hud.best")} value={bestLap ? formatTime(bestLap) : "--:--"} accent />
+            <Stat
+              label={t("hud.session")}
+              value={sessionBest ? formatTime(sessionBest) : "--:--"}
+            />
+            <Stat label={t("hud.lap")} value={lap === 1 ? t("hud.outLap") : String(lap - 1)} />
           </div>
 
           <div className="absolute bottom-3 right-3 rounded-xl border border-border/40 bg-card/80 px-4 py-2 text-right backdrop-blur-md sm:bottom-6 sm:right-6 sm:px-6 sm:py-3 [@media(pointer:coarse)]:bottom-auto [@media(pointer:coarse)]:left-2 [@media(pointer:coarse)]:right-auto [@media(pointer:coarse)]:top-[4.75rem]">
@@ -293,6 +317,48 @@ export function Hud() {
           {lastLap !== null && phase === "racing" && (
             <div className="absolute left-1/2 top-16 -translate-x-1/2 rounded-full border border-border/40 bg-card/80 px-4 py-1.5 font-mono text-xs text-foreground backdrop-blur-md sm:top-6 sm:px-5 sm:py-2 sm:text-sm">
               {t("hud.lastLap")} {formatTime(lastLap)}
+            </div>
+          )}
+
+          {/* Pit stop countdown — the lap clock keeps running underneath. */}
+          {pitRemaining !== null && phase === "racing" && (
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-primary/50 bg-card/90 px-8 py-5 text-center backdrop-blur-md">
+              <div className="text-sm font-black uppercase tracking-[0.3em] text-primary">
+                {t("hud.pitStop")}
+              </div>
+              <div className="mt-2 font-mono text-5xl font-black tabular-nums text-foreground">
+                {pitRemaining.toFixed(1)}
+              </div>
+            </div>
+          )}
+
+          {boostVisible && phase === "racing" && (
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-emerald-400/60 bg-card/90 px-8 py-4 text-center backdrop-blur-md">
+              <div className="text-2xl font-black uppercase tracking-[0.3em] text-emerald-400">
+                {t("hud.pitGo")}
+              </div>
+            </div>
+          )}
+
+          {/* Lap closed: time and gap to the personal best, race keeps going. */}
+          {bannerVisible && lapBanner && phase === "racing" && (
+            <div className="absolute left-1/2 top-32 -translate-x-1/2 rounded-2xl border border-border/40 bg-card/90 px-6 py-3 text-center backdrop-blur-md">
+              <div className="text-[0.65rem] font-semibold uppercase tracking-[0.25em] text-foreground/50">
+                {lapBanner.improved ? t("hud.newRecord") : t("hud.lapDone")}
+              </div>
+              <div className="font-mono text-3xl font-black tabular-nums text-foreground">
+                {formatTime(lapBanner.time)}
+              </div>
+              {lapBanner.delta !== null && (
+                <div
+                  className={`font-mono text-base font-bold tabular-nums ${
+                    lapBanner.delta <= 0 ? "text-emerald-400" : "text-destructive"
+                  }`}
+                >
+                  {lapBanner.delta <= 0 ? "-" : "+"}
+                  {formatTime(Math.abs(lapBanner.delta))}
+                </div>
+              )}
             </div>
           )}
         </>
