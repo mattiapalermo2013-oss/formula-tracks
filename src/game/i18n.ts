@@ -167,6 +167,20 @@ const en: Dict = {
   "auth.back": "Back to the game",
   "auth.created": "Account created. Check your email if required, then sign in.",
   "auth.googleFailed": "Google sign-in failed.",
+
+  // staff
+  "staff.title": "Staff access",
+  "staff.password": "Staff password",
+  "staff.confirm": "Confirm",
+  "staff.close": "Close",
+  "staff.wrong": "Wrong password",
+  "staff.unlocked": "Admin mode unlocked",
+  "staff.lock": "Lock",
+  "staff.resetTrack": "Reset leaderboard (this track)",
+  "staff.resetAll": "Reset leaderboard (all tracks)",
+  "staff.resetLocal": "Clear my local records",
+  "staff.deleted": "Times deleted:",
+  "staff.localCleared": "Local records cleared",
 };
 
 const it: Dict = {
@@ -322,6 +336,20 @@ const it: Dict = {
   "auth.back": "Torna al gioco",
   "auth.created": "Account creato. Controlla la mail se richiesto, poi accedi.",
   "auth.googleFailed": "Accesso con Google non riuscito.",
+
+  // staff
+  "staff.title": "Accesso staff",
+  "staff.password": "Password staff",
+  "staff.confirm": "Conferma",
+  "staff.close": "Chiudi",
+  "staff.wrong": "Password errata",
+  "staff.unlocked": "Modalità admin sbloccata",
+  "staff.lock": "Blocca",
+  "staff.resetTrack": "Azzera classifica (questa pista)",
+  "staff.resetAll": "Azzera classifica (tutte le piste)",
+  "staff.resetLocal": "Cancella i miei record locali",
+  "staff.deleted": "Tempi eliminati:",
+  "staff.localCleared": "Record locali cancellati",
 };
 
 const DICTS: Record<Lang, Dict> = { en, it };

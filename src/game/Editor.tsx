@@ -3,6 +3,7 @@ import { PIECE_DEFS } from "./blocks";
 import { useTrackStore } from "./trackStore";
 import { useRaceStore } from "./store";
 import { useTracksStore } from "./tracksStore";
+import { useStaffStore } from "./staffStore";
 import { useT } from "./i18n";
 
 export function Editor() {
@@ -10,7 +11,8 @@ export function Editor() {
   const phase = useRaceStore((s) => s.phase);
   const startRace = useRaceStore((s) => s.startRace);
   const { pieces, track, add, undo, clear, useDefault } = useTrackStore();
-  const { tracks, selected, select, isAdmin, saving, error, save } = useTracksStore();
+  const { tracks, selected, select, saving, error, save } = useTracksStore();
+  const isAdmin = useStaffStore((s) => s.unlocked);
   const [name, setName] = useState("");
   const [savedAt, setSavedAt] = useState(false);
 

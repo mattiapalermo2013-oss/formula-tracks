@@ -2,6 +2,8 @@ import { create } from "zustand";
 import { supabase } from "@/integrations/supabase/client";
 import type { PieceType } from "./blocks";
 import { useTrackStore } from "./trackStore";
+import { useStaffStore } from "./staffStore";
+import { saveTrackAsStaff } from "@/lib/staff.functions";
 
 export const TRACK_SLOTS = 24;
 const SLOT_KEY = "polyrush-slot";
@@ -93,12 +95,19 @@ export const useTracksStore = create<TracksState>((set, get) => ({
 
   save: async (slot, name, pieces) => {
     set({ saving: true, error: null });
-    const { error } = await supabase
-      .from("tracks")
-      .update({ name, pieces })
-      .eq("slot", slot);
-    if (error) {
-      set({ saving: false, error: error.message });
+    const password = useStaffStore.getState().password;
+    if (!password) {
+      set({ saving: false, error: "staff" });
+      return;
+    }
+    try {
+      const res = await saveTrackAsStaff({ data: { password, slot, name, pieces } });
+      if (!res.ok) {
+        set({ saving: false, error: "staff" });
+        return;
+      }
+    } catch (e) {
+      set({ saving: false, error: e instanceof Error ? e.message : "error" });
       return;
     }
     set((s) => ({

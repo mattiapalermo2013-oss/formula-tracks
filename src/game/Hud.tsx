@@ -1,5 +1,4 @@
 import { Suspense, useEffect, useRef, useState } from "react";
-import { Link } from "@tanstack/react-router";
 import { Canvas, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { formatTime, useRaceStore } from "./store";
@@ -18,6 +17,8 @@ import { ControlsPanel } from "./ControlsPanel";
 import { RotateOverlay, TouchControls } from "./TouchControls";
 import { keyName, useControlsStore } from "./controlsStore";
 import { useI18nStore, useT, type Lang } from "./i18n";
+import { StaffGate } from "./StaffGate";
+import { useStaffStore } from "./staffStore";
 
 function Turntable() {
   const ref = useRef<THREE.Group>(null);
@@ -192,11 +193,10 @@ export function Hud() {
   const [showControls, setShowControls] = useState(false);
   const bindings = useControlsStore((s) => s.bindings);
   const lastRank = useLeaderboardStore((s) => s.lastRank);
-  const userId = useLeaderboardStore((s) => s.userId);
   const refreshLeaderboardAuth = useLeaderboardStore((s) => s.refreshAuth);
   const fetchAll = useTracksStore((s) => s.fetchAll);
   const refreshAuth = useTracksStore((s) => s.refreshAuth);
-  const isAdmin = useTracksStore((s) => s.isAdmin);
+  const isAdmin = useStaffStore((s) => s.unlocked);
 
   useEffect(() => {
     void fetchAll();
@@ -225,6 +225,7 @@ export function Hud() {
 
   return (
     <div className="pointer-events-none fixed inset-0 z-10 select-none">
+      <StaffGate />
       {(phase === "racing" || phase === "finished") && (
         <>
           <div className="absolute left-2 top-2 flex gap-3 rounded-xl border border-border/40 bg-card/80 px-3 py-2 backdrop-blur-md sm:left-4 sm:top-4 sm:gap-5 sm:px-5 sm:py-3">
@@ -302,18 +303,6 @@ export function Hud() {
           <div className="my-auto flex flex-col items-center">
           <div className="mb-4 flex items-center gap-3">
             <LanguageSwitch />
-            {userId ? (
-              <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">
-                {t("menu.signedIn")}
-              </span>
-            ) : (
-              <Link
-                to="/auth"
-                className="pointer-events-auto rounded-full border border-primary px-6 py-2 text-xs font-bold uppercase tracking-widest text-primary transition-colors hover:bg-primary/10"
-              >
-                {t("menu.signIn")}
-              </Link>
-            )}
           </div>
           <p className="text-xs font-semibold uppercase tracking-[0.45em] text-primary">
             {t("menu.tagline")}
@@ -409,25 +398,10 @@ export function Hud() {
             <p className="mt-2 text-sm text-muted-foreground">
               {t("hud.record")} {bestLap ? formatTime(bestLap) : "--"}
             </p>
-            {userId ? (
-              lastRank !== null && (
-                <p className="mt-4 font-mono text-sm font-bold uppercase tracking-widest text-foreground">
-                  {t("hud.worldRank")}{" "}
-                  <span className="text-primary">#{lastRank}</span>
-                </p>
-              )
-            ) : (
-              <div className="mt-4">
-                <p className="mb-2 text-xs text-muted-foreground">
-                  {t("hud.signInPrompt")}
-                </p>
-                <a
-                  href="/auth"
-                  className="pointer-events-auto inline-block rounded-full border border-primary px-6 py-2 text-xs font-bold uppercase tracking-widest text-primary transition-colors hover:bg-primary/10"
-                >
-                  {t("menu.signIn")}
-                </a>
-              </div>
+            {lastRank !== null && (
+              <p className="mt-4 font-mono text-sm font-bold uppercase tracking-widest text-foreground">
+                {t("hud.worldRank")} <span className="text-primary">#{lastRank}</span>
+              </p>
             )}
 
             <button
