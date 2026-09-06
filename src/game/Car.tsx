@@ -9,7 +9,7 @@ import { CarModel } from "./CarModel";
 import { useControlsStore } from "./controlsStore";
 import { touchInput } from "./touchControls";
 import { pushSkid, clearSkids } from "./skidmarks";
-import { updateEngine, updateSkid } from "./audio";
+import { updateEngine, updateSkid, unlockAudio, stopEngineSound } from "./audio";
 
 // Feel constants — tune these, not the model.
 const ACCEL = 34;
@@ -79,6 +79,18 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
     });
     clearSkids();
   }, [phase, track]);
+
+  // Browsers only allow audio after a user gesture.
+  useEffect(() => {
+    const unlock = () => unlockAudio();
+    window.addEventListener("keydown", unlock);
+    window.addEventListener("pointerdown", unlock);
+    return () => {
+      window.removeEventListener("keydown", unlock);
+      window.removeEventListener("pointerdown", unlock);
+      stopEngineSound();
+    };
+  }, []);
 
   useFrame((_, rawDelta) => {
     const dt = Math.min(rawDelta, 0.05);
