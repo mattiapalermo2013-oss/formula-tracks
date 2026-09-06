@@ -167,6 +167,20 @@ const en: Dict = {
   "auth.back": "Back to the game",
   "auth.created": "Account created. Check your email if required, then sign in.",
   "auth.googleFailed": "Google sign-in failed.",
+
+  // staff
+  "staff.title": "Staff access",
+  "staff.password": "Staff password",
+  "staff.confirm": "Confirm",
+  "staff.close": "Close",
+  "staff.wrong": "Wrong password",
+  "staff.unlocked": "Admin mode unlocked",
+  "staff.lock": "Lock",
+  "staff.resetTrack": "Reset leaderboard (this track)",
+  "staff.resetAll": "Reset leaderboard (all tracks)",
+  "staff.resetLocal": "Clear my local records",
+  "staff.deleted": "Times deleted:",
+  "staff.localCleared": "Local records cleared",
 };
 
 const it: Dict = {
