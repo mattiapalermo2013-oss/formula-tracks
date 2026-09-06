@@ -76,6 +76,7 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
       started: phase === "racing",
       timerStarted: false,
     });
+    clearSkids();
   }, [phase, track]);
 
   useFrame((_, rawDelta) => {
@@ -105,6 +106,7 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
         vx: 0, vz: 0, vy: 0, grounded: true, trackIdx: 2,
         lap: 1, checkpoint: 0, lapStart: 0, elapsed: 0, timerStarted: false,
       });
+      clearSkids();
       store.setTelemetry(0, 0);
     }
     lastResetKey.current = resetPressed;
@@ -203,6 +205,7 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
           lap: 1, checkpoint: 0, lapStart: 0, elapsed: 0,
           timerStarted: false,
         });
+        clearSkids();
       }
       store.setProgress(s.lap, s.checkpoint);
     }
