@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { trackQuery, yawAt, type Track } from "./track";
+import { trackQuery, yawAt, pitExtensionAt, PIT_STOP_SECONDS, type Track } from "./track";
 import { useTrackStore } from "./trackStore";
 import { useKeyboard } from "./useKeyboard";
 import { useRaceStore } from "./store";
@@ -36,6 +36,8 @@ interface VehicleState {
   elapsed: number;
   started: boolean;
   timerStarted: boolean;
+  pitTimer: number;
+  pitDone: boolean;
 }
 
 function spawnAt(track: Track, index: number): Pick<VehicleState, "x" | "y" | "z" | "yaw"> {
@@ -64,6 +66,8 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
     elapsed: 0,
     started: false,
     timerStarted: false,
+    pitTimer: 0,
+    pitDone: false,
   });
   const lastResetKey = useRef(false);
   const lastStoreSync = useRef(0);
@@ -76,6 +80,8 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
       lap: 1, checkpoint: 0, lapStart: 0, elapsed: 0,
       started: phase === "racing",
       timerStarted: false,
+      pitTimer: 0,
+      pitDone: false,
     });
     lastStoreSync.current = -1;
     clearSkids();
@@ -119,6 +125,7 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
       Object.assign(s, spawnAt(trk, 2), {
         vx: 0, vz: 0, vy: 0, grounded: true, trackIdx: 2,
         lap: 1, checkpoint: 0, lapStart: 0, elapsed: 0, timerStarted: false,
+        pitTimer: 0, pitDone: false,
       });
       lastStoreSync.current = -1;
       clearSkids();
