@@ -212,7 +212,9 @@ export function trackQuery(track: Track, px: number, pz: number, prevIndex: numb
   const s = track.samples[best]!;
   const r = s.right;
   const lat = (px - s.pos.x) * r.x + (pz - s.pos.z) * r.y;
-  const limit = s.half - 1.2;
+  const pitSide = track.pit ? track.pit.side : 1;
+  const extra = Math.sign(lat) === pitSide ? pitExtensionAt(track, best) : 0;
+  const limit = s.half - 1.2 + extra;
   if (Math.abs(lat) > limit) {
     const sign = Math.sign(lat);
     const push = Math.abs(lat) - limit;
