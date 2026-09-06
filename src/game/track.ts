@@ -121,7 +121,64 @@ export function buildTrack(pieces: PieceType[]): Track {
   const checkpoints = rs.checkpoints.length
     ? rs.checkpoints
     : [0.25, 0.5, 0.75].map((f) => Math.floor(count * f));
-  return { samples, count, checkpoints, length };
+  return { samples, count, checkpoints, length, pit: findPitZone(samples, count) };
+}
+
+// --- Pit lane -------------------------------------------------------------
+export const PIT_WIDTH = 7.5;
+export const PIT_RAMP = 8; // samples used to taper the lane open/close
+export const PIT_STOP_SECONDS = 3;
+
+// The pit lane sits on the longest straight (the "main straight"), on the
+// inside-free right hand side, so entry and exit are never mid-corner.
+function findPitZone(samples: TrackSample[], count: number): PitZone | null {
+  const straight = (i: number) => {
+    const a = samples[i]!.tangent;
+    const b = samples[(i + 1) % count]!.tangent;
+    return Math.abs(Math.atan2(a.x, a.z) - Math.atan2(b.x, b.z)) < 0.035;
+  };
+  let bestStart = -1;
+  let bestLen = 0;
+  let runStart = -1;
+  let run = 0;
+  for (let i = 0; i < count * 2; i++) {
+    if (straight(i % count)) {
+      if (run === 0) runStart = i;
+      run++;
+      if (run > bestLen && run <= count) {
+        bestLen = run;
+        bestStart = runStart;
+      }
+    } else {
+      run = 0;
+    }
+  }
+  const minLen = PIT_RAMP * 2 + 16;
+  if (bestStart < 0 || bestLen < minLen) return null;
+  const margin = Math.max(2, Math.floor((bestLen - minLen) / 4));
+  const start = (bestStart + margin) % count;
+  const len = bestLen - margin * 2;
+  const end = (start + len) % count;
+  return { start, end, box: (start + Math.floor(len / 2)) % count, side: 1, width: PIT_WIDTH };
+}
+
+function pitProgress(track: Track, index: number): number {
+  const pit = track.pit;
+  if (!pit) return 0;
+  const n = track.count;
+  const rel = (((index - pit.start) % n) + n) % n;
+  const span = (((pit.end - pit.start) % n) + n) % n;
+  if (rel > span) return 0;
+  const ramp = Math.min(PIT_RAMP, span / 2);
+  const t = Math.min(rel / ramp, (span - rel) / ramp, 1);
+  return Math.max(0, Math.min(1, t));
+}
+
+/** Extra lateral room (on the pit side) available at this sample. */
+export function pitExtensionAt(track: Track, index: number): number {
+  const pit = track.pit;
+  if (!pit) return 0;
+  return pitProgress(track, index) * pit.width;
 }
 
 export function yawAt(track: Track, index: number): number {
