@@ -28,7 +28,7 @@ export function ControlsPanel({ onClose }: { onClose: () => void }) {
   }, [waiting, setBinding]);
 
   return (
-    <div className="pointer-events-auto mt-6 w-full max-w-md rounded-2xl border border-border/50 bg-card/90 p-6 backdrop-blur-md">
+    <div className="pointer-events-auto mt-6 w-full max-w-md rounded-2xl border border-border/50 bg-card/90 p-4 backdrop-blur-md sm:p-6">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-bold uppercase tracking-[0.3em] text-foreground">
           Comandi

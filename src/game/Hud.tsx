@@ -85,7 +85,7 @@ function LiveryPanel({ onClose }: { onClose: () => void }) {
   const { body, accent, pattern, number, setBody, setAccent, setPattern, setNumber } =
     useLiveryStore();
   return (
-    <div className="pointer-events-auto mt-6 w-full max-w-md overflow-y-auto overscroll-contain rounded-2xl border border-border/50 bg-card/90 p-6 backdrop-blur-md" style={{ maxHeight: "min(70vh, 640px)" }}>
+    <div className="pointer-events-auto mt-6 w-full max-w-md overflow-y-auto overscroll-contain rounded-2xl border border-border/50 bg-card/90 p-4 backdrop-blur-md sm:p-6" style={{ maxHeight: "min(70vh, 640px)" }}>
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-sm font-bold uppercase tracking-[0.25em] text-foreground">
           Officina
