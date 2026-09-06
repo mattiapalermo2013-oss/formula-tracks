@@ -240,10 +240,10 @@ export function Hud() {
 
           <div className="absolute bottom-3 right-3 rounded-xl border border-border/40 bg-card/80 px-4 py-2 text-right backdrop-blur-md sm:bottom-6 sm:right-6 sm:px-6 sm:py-3 [@media(pointer:coarse)]:bottom-auto [@media(pointer:coarse)]:left-2 [@media(pointer:coarse)]:right-auto [@media(pointer:coarse)]:top-[4.75rem]">
             <div className="font-mono text-3xl font-bold tabular-nums text-foreground sm:text-5xl">
-              {speed}
+              {displaySpeed(speed, units)}
             </div>
             <div className="text-[0.65rem] font-semibold uppercase tracking-[0.25em] text-foreground/50">
-              km/h
+              {speedUnitLabel(units)}
             </div>
           </div>
 
