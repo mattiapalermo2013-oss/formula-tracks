@@ -19,7 +19,11 @@ const en: Dict = {
   "menu.play": "Play",
   "menu.build": "Build track",
   "menu.customize": "Customize car",
-  "menu.controls": "Controls",
+  "menu.settings": "Settings",
+  "settings.language": "Language",
+  "settings.units": "Speed unit",
+  "settings.kmh": "km/h",
+  "settings.mph": "mph",
 
   // hud
   "hud.time": "Time",
@@ -207,7 +211,11 @@ const it: Dict = {
   "menu.play": "Gioca",
   "menu.build": "Costruisci la pista",
   "menu.customize": "Personalizza auto",
-  "menu.controls": "Comandi",
+  "menu.settings": "Impostazioni",
+  "settings.language": "Lingua",
+  "settings.units": "Unità di velocità",
+  "settings.kmh": "km/h",
+  "settings.mph": "mph",
 
   "hud.time": "Tempo",
   "hud.best": "Record",

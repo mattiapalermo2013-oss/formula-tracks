@@ -16,7 +16,8 @@ import { useLeaderboardStore } from "./leaderboardStore";
 import { ControlsPanel } from "./ControlsPanel";
 import { RotateOverlay, TouchControls } from "./TouchControls";
 import { keyName, useControlsStore } from "./controlsStore";
-import { useI18nStore, useT, type Lang } from "./i18n";
+import { useT } from "./i18n";
+import { displaySpeed, speedUnitLabel, useSettingsStore } from "./settingsStore";
 import { StaffGate } from "./StaffGate";
 import { useStaffStore } from "./staffStore";
 
@@ -58,26 +59,6 @@ const PATTERNS: { id: LiveryPattern; label: string }[] = [
   { id: "split", label: "livery.split" },
 ];
 
-function LanguageSwitch() {
-  const lang = useI18nStore((s) => s.lang);
-  const setLang = useI18nStore((s) => s.setLang);
-  const langs: Lang[] = ["en", "it"];
-  return (
-    <div className="pointer-events-auto flex gap-1 rounded-full border border-border/60 bg-card/70 p-1">
-      {langs.map((l) => (
-        <button
-          key={l}
-          onClick={() => setLang(l)}
-          className={`rounded-full px-3 py-1 text-[0.65rem] font-bold uppercase tracking-widest transition-colors ${
-            lang === l ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-foreground/10"
-          }`}
-        >
-          {l}
-        </button>
-      ))}
-    </div>
-  );
-}
 
 function Swatches({
   colors,
@@ -186,6 +167,7 @@ export function Hud() {
   const t = useT();
   const { phase, lap, checkpoint, speed, elapsed, lastLap, bestLap, sessionBest, lapBanner, pitRemaining, pitReadyKey, raceTime, raceDelta, lastSplit, startRace, reset, openEditor } =
     useRaceStore();
+  const units = useSettingsStore((s) => s.units);
   const [bannerVisible, setBannerVisible] = useState(false);
   const [boostVisible, setBoostVisible] = useState(false);
   const gates = useTrackStore((s) => s.track.checkpoints.length);
@@ -259,10 +241,10 @@ export function Hud() {
 
           <div className="absolute bottom-3 right-3 rounded-xl border border-border/40 bg-card/80 px-4 py-2 text-right backdrop-blur-md sm:bottom-6 sm:right-6 sm:px-6 sm:py-3 [@media(pointer:coarse)]:bottom-auto [@media(pointer:coarse)]:left-2 [@media(pointer:coarse)]:right-auto [@media(pointer:coarse)]:top-[4.75rem]">
             <div className="font-mono text-3xl font-bold tabular-nums text-foreground sm:text-5xl">
-              {speed}
+              {displaySpeed(speed, units)}
             </div>
             <div className="text-[0.65rem] font-semibold uppercase tracking-[0.25em] text-foreground/50">
-              km/h
+              {speedUnitLabel(units)}
             </div>
           </div>
 
@@ -367,9 +349,7 @@ export function Hud() {
       {phase === "ready" && (
         <div className="pointer-events-auto absolute inset-0 flex flex-col items-center overflow-y-auto bg-background/70 px-3 py-6 backdrop-blur-sm">
           <div className="my-auto flex flex-col items-center">
-          <div className="mb-4 flex items-center gap-3">
-            <LanguageSwitch />
-          </div>
+          
           <p className="text-xs font-semibold uppercase tracking-[0.45em] text-primary">
             {t("menu.tagline")}
           </p>
@@ -416,7 +396,7 @@ export function Hud() {
                 setShowControls((v) => !v);
               }}
             >
-              {t("menu.controls")}
+              {t("menu.settings")}
             </button>
           </div>
           {showTracks && <TracksPanel onClose={() => setShowTracks(false)} />}
