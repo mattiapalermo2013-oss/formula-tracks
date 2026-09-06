@@ -10,12 +10,12 @@ export type ControlAction =
   | "reset";
 
 export const CONTROL_LABELS: Record<ControlAction, string> = {
-  accelerate: "Accelera",
-  brake: "Frena / Retromarcia",
-  left: "Sterza a sinistra",
-  right: "Sterza a destra",
-  handbrake: "Freno a mano",
-  reset: "Reset giro",
+  accelerate: "action.accelerate",
+  brake: "action.brake",
+  left: "action.left",
+  right: "action.right",
+  handbrake: "action.handbrake",
+  reset: "action.reset",
 };
 
 export const DEFAULT_BINDINGS: Record<ControlAction, string> = {
@@ -28,22 +28,22 @@ export const DEFAULT_BINDINGS: Record<ControlAction, string> = {
 };
 
 const KEY_NAMES: Record<string, string> = {
-  Space: "Spazio",
-  ArrowUp: "Freccia su",
-  ArrowDown: "Freccia giù",
-  ArrowLeft: "Freccia sinistra",
-  ArrowRight: "Freccia destra",
-  ShiftLeft: "Shift sx",
-  ShiftRight: "Shift dx",
-  ControlLeft: "Ctrl sx",
-  ControlRight: "Ctrl dx",
-  AltLeft: "Alt sx",
-  AltRight: "Alt dx",
+  Space: "Space",
+  ArrowUp: "Arrow Up",
+  ArrowDown: "Arrow Down",
+  ArrowLeft: "Arrow Left",
+  ArrowRight: "Arrow Right",
+  ShiftLeft: "Shift L",
+  ShiftRight: "Shift R",
+  ControlLeft: "Ctrl L",
+  ControlRight: "Ctrl R",
+  AltLeft: "Alt L",
+  AltRight: "Alt R",
   Escape: "Esc",
-  Enter: "Invio",
+  Enter: "Enter",
   Tab: "Tab",
   Backspace: "Backspace",
-  CapsLock: "Bloc Maiusc",
+  CapsLock: "Caps Lock",
 };
 
 export function keyName(code: string): string {
