@@ -12,9 +12,9 @@ import { pushSkid, clearSkids } from "./skidmarks";
 import { updateEngine, updateSkid, unlockAudio, stopEngineSound } from "./audio";
 
 // Feel constants — tune these, not the model.
-const ACCEL = 34;
+const ACCEL = 13; // real-F1-like: 0-100 km/h in ~2.5s, 0-300 in ~10s
 const BRAKE = 26;
-const DRAG = 0.25;
+const DRAG = 0.02;
 const TURN = 1.3;
 const GRIP = 7.0;
 const GRAVITY = -26;
@@ -139,7 +139,10 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
     let vLat = s.vx * rdx + s.vz * rdz;
 
     if (s.grounded) {
-      vLong += forward * ACCEL * dt;
+      // Real-F1 power curve: full shove at low speed, fading toward top speed.
+      const vr = Math.max(vLong, 0) / MAX_SPEED;
+      const powerFactor = Math.max(0, 1 - vr * vr * vr);
+      vLong += forward * ACCEL * (forward > 0 ? powerFactor : 1) * dt;
       if (braking) vLong -= Math.sign(vLong) * BRAKE * dt;
       vLong -= vLong * DRAG * dt;
       vLong = THREE.MathUtils.clamp(vLong, -8, MAX_SPEED);
