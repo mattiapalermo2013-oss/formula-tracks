@@ -123,6 +123,11 @@ const en: Dict = {
   "editor.noBlocks": "No blocks",
   "editor.cameraHint": "Drag to rotate · scroll to zoom",
   "editor.exit": "Exit",
+  "editor.start": "Start line",
+  "editor.startHint": "Place where the lap begins",
+  "editor.startRotate": "Rotate 45°",
+  "editor.startReset": "Reset position",
+  "editor.startMove": "Move",
 
   // blocks
   "block.straight": "Straight",
@@ -298,6 +303,11 @@ const it: Dict = {
   "editor.save": "Salva",
   "editor.saved": "Salvato",
   "editor.noBlocks": "Nessun blocco",
+  "editor.start": "Linea di partenza",
+  "editor.startHint": "Decidi dove inizia il giro",
+  "editor.startRotate": "Ruota di 45°",
+  "editor.startReset": "Reimposta posizione",
+  "editor.startMove": "Sposta",
   "editor.cameraHint": "Trascina per ruotare · rotella per zoom",
   "editor.exit": "Esci",
 
