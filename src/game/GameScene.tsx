@@ -4,6 +4,7 @@ import { Environment, Lightformer } from "@react-three/drei";
 import * as THREE from "three";
 import { TrackMesh } from "./TrackMesh";
 import { Car } from "./Car";
+import { SkidMarks } from "./SkidMarks";
 import { ChaseCamera } from "./ChaseCamera";
 import { EditorCamera } from "./EditorCamera";
 import { useRaceStore } from "./store";
@@ -59,6 +60,7 @@ export function GameScene() {
 
       <Ground />
       <TrackMesh />
+      <SkidMarks />
       <Suspense fallback={null}>
         <Car groupRef={carRef} />
       </Suspense>

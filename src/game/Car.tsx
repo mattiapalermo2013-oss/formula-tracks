@@ -8,6 +8,7 @@ import { useRaceStore } from "./store";
 import { CarModel } from "./CarModel";
 import { useControlsStore } from "./controlsStore";
 import { touchInput } from "./touchControls";
+import { pushSkid, clearSkids } from "./skidmarks";
 
 // Feel constants — tune these, not the model.
 const ACCEL = 34;
@@ -75,6 +76,7 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
       started: phase === "racing",
       timerStarted: false,
     });
+    clearSkids();
   }, [phase, track]);
 
   useFrame((_, rawDelta) => {
@@ -104,6 +106,7 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
         vx: 0, vz: 0, vy: 0, grounded: true, trackIdx: 2,
         lap: 1, checkpoint: 0, lapStart: 0, elapsed: 0, timerStarted: false,
       });
+      clearSkids();
       store.setTelemetry(0, 0);
     }
     lastResetKey.current = resetPressed;
@@ -202,6 +205,7 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
           lap: 1, checkpoint: 0, lapStart: 0, elapsed: 0,
           timerStarted: false,
         });
+        clearSkids();
       }
       store.setProgress(s.lap, s.checkpoint);
     }
@@ -220,6 +224,23 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
       leanRef.current.rotation.z += (targetRoll - leanRef.current.rotation.z) * (1 - Math.exp(-6 * dt));
       const targetPitch = s.grounded ? 0 : THREE.MathUtils.clamp(-s.vy * 0.02, -0.15, 0.25);
       leanRef.current.rotation.x += (targetPitch - leanRef.current.rotation.x) * (1 - Math.exp(-4 * dt));
+
+      // Show the car visibly sideways while drifting: amplify the slip angle.
+      const drifting = s.grounded && speed > 6 && (Math.abs(vLat) > 3.5 || braking);
+      const targetDriftYaw = drifting ? THREE.MathUtils.clamp(slip * 0.85, -0.55, 0.55) : 0;
+      leanRef.current.rotation.y += (targetDriftYaw - leanRef.current.rotation.y) * (1 - Math.exp(-7 * dt));
+
+      // Lay tire marks on the asphalt under the rear wheels while drifting.
+      if (drifting) {
+        const fdx2 = Math.sin(s.yaw);
+        const fdz2 = Math.cos(s.yaw);
+        const rdx2 = Math.cos(s.yaw);
+        const rdz2 = -Math.sin(s.yaw);
+        const rearX = s.x - fdx2 * 1.1;
+        const rearZ = s.z - fdz2 * 1.1;
+        pushSkid(rearX + rdx2 * 0.75, s.y, rearZ + rdz2 * 0.75, s.yaw + targetDriftYaw);
+        pushSkid(rearX - rdx2 * 0.75, s.y, rearZ - rdz2 * 0.75, s.yaw + targetDriftYaw);
+      }
     }
 
     if (s.elapsed - lastStoreSync.current > 0.1 || !racing) {
