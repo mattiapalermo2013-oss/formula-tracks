@@ -2,6 +2,8 @@ import { create } from "zustand";
 import { supabase } from "@/integrations/supabase/client";
 import type { PieceType } from "./blocks";
 import { useTrackStore } from "./trackStore";
+import { useStaffStore } from "./staffStore";
+import { saveTrackAsStaff } from "@/lib/staff.functions";
 
 export const TRACK_SLOTS = 24;
 const SLOT_KEY = "polyrush-slot";
