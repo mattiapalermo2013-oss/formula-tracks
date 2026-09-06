@@ -193,7 +193,7 @@ export function TracksPanel({ onClose }: { onClose: () => void }) {
                     onClick={signOut}
                     className="rounded-full border border-border/60 px-4 py-2 font-bold uppercase tracking-widest text-foreground"
                   >
-                    Esci
+                    {t("tracks.signOut")}
                   </button>
                 </div>
               </div>
@@ -211,7 +211,7 @@ export function TracksPanel({ onClose }: { onClose: () => void }) {
                     onClick={signOut}
                     className="rounded-full border border-border/60 px-4 py-2 font-bold uppercase tracking-widest text-foreground"
                   >
-                    Esci
+                    {t("tracks.signOut")}
                   </button>
                 </div>
               </div>
