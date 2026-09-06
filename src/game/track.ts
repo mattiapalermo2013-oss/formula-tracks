@@ -97,8 +97,8 @@ function smoothScalar(vals: number[], passes: number): number[] {
   return out;
 }
 
-export function buildTrack(pieces: PieceType[]): Track {
-  const poly = buildPolyline(pieces);
+export function buildTrack(pieces: PieceType[], startPose?: StartPose): Track {
+  const poly = buildPolyline(pieces, startPose);
   const rs = resample(poly.points, poly.widths, poly.marks, 1.5);
   const pts = smooth(rs.points, 2);
   const widths = smoothScalar(rs.widths, 6);

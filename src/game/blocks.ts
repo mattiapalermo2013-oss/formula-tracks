@@ -156,14 +156,27 @@ export interface Polyline {
   marks: number[];
 }
 
+export interface StartPose {
+  x: number;
+  z: number;
+  yaw: number;
+}
+
+export const DEFAULT_START: StartPose = { x: 0, z: 0, yaw: 0 };
+
 /**
  * Builds the closed centerline polyline for a list of pieces. The loop is
  * always closed: a smooth bezier link joins the last piece back to the start
- * line, so the circuit is drivable whatever the player builds.
+ * line, so the circuit is drivable whatever the player builds. The start
+ * line pose (position + heading) can be chosen by the builder.
  */
-export function buildPolyline(pieces: PieceType[]): Polyline {
-  const b: Build = { pts: [new THREE.Vector3(0, 0, 0)], widths: [BASE_HALF], marks: [] };
-  const c: Cursor = { x: 0, y: 0, z: 0, yaw: 0 };
+export function buildPolyline(pieces: PieceType[], startPose: StartPose = DEFAULT_START): Polyline {
+  const b: Build = {
+    pts: [new THREE.Vector3(startPose.x, 0, startPose.z)],
+    widths: [BASE_HALF],
+    marks: [],
+  };
+  const c: Cursor = { x: startPose.x, y: 0, z: startPose.z, yaw: startPose.yaw };
   for (const p of pieces) applyPiece(b, c, p);
 
   // --- closing link: cubic bezier honouring both headings
@@ -177,7 +190,11 @@ export function buildPolyline(pieces: PieceType[]): Polyline {
       end.y,
       end.z + Math.cos(c.yaw) * handle,
     );
-    const h2 = new THREE.Vector3(start.x, start.y, start.z - handle); // start heads +Z
+    const h2 = new THREE.Vector3(
+      start.x - Math.sin(startPose.yaw) * handle,
+      start.y,
+      start.z - Math.cos(startPose.yaw) * handle,
+    ); // approaches the start line against its heading
     const curve = new THREE.CubicBezierCurve3(end, h1, h2, start);
     const n = Math.max(8, Math.round(curve.getLength() / STEP));
     for (let i = 1; i < n; i++) {
