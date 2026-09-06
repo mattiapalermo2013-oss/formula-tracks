@@ -16,7 +16,8 @@ import { useLeaderboardStore } from "./leaderboardStore";
 import { ControlsPanel } from "./ControlsPanel";
 import { RotateOverlay, TouchControls } from "./TouchControls";
 import { keyName, useControlsStore } from "./controlsStore";
-import { useI18nStore, useT, type Lang } from "./i18n";
+import { useT } from "./i18n";
+import { displaySpeed, speedUnitLabel, useSettingsStore } from "./settingsStore";
 import { StaffGate } from "./StaffGate";
 import { useStaffStore } from "./staffStore";
 
