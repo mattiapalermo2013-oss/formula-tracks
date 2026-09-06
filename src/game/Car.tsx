@@ -127,7 +127,7 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
     lastResetKey.current = resetPressed;
 
     // The clock starts on the first throttle input, not at phase change.
-    if (racing && !s.timerStarted && (forward > 0 || braking)) s.timerStarted = true;
+    if (racing && !s.timerStarted && (forward !== 0 || braking)) s.timerStarted = true;
     if (racing && s.timerStarted) s.elapsed += dt;
 
     const fdx = Math.sin(s.yaw);
