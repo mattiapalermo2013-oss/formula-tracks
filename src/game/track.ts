@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { BASE_HALF, buildPolyline, type PieceType } from "./blocks";
+import { BASE_HALF, buildPolyline, type PieceType, type StartPose } from "./blocks";
 
 // ---------------------------------------------------------------------------
 // A Track is the resampled centerline of a block layout. Geometry, collision
