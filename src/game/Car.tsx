@@ -9,6 +9,7 @@ import { CarModel } from "./CarModel";
 import { useControlsStore } from "./controlsStore";
 import { touchInput } from "./touchControls";
 import { pushSkid, clearSkids } from "./skidmarks";
+import { updateEngine, updateSkid, unlockAudio, stopEngineSound } from "./audio";
 
 // Feel constants — tune these, not the model.
 const ACCEL = 34;
@@ -17,7 +18,7 @@ const DRAG = 0.25;
 const TURN = 1.3;
 const GRIP = 7.0;
 const GRAVITY = -26;
-const MAX_SPEED = 83.3; // ~300 km/h
+const MAX_SPEED = 100; // ~360 km/h
 
 interface VehicleState {
   x: number;
@@ -78,6 +79,18 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
     });
     clearSkids();
   }, [phase, track]);
+
+  // Browsers only allow audio after a user gesture.
+  useEffect(() => {
+    const unlock = () => unlockAudio();
+    window.addEventListener("keydown", unlock);
+    window.addEventListener("pointerdown", unlock);
+    return () => {
+      window.removeEventListener("keydown", unlock);
+      window.removeEventListener("pointerdown", unlock);
+      stopEngineSound();
+    };
+  }, []);
 
   useFrame((_, rawDelta) => {
     const dt = Math.min(rawDelta, 0.05);
@@ -229,6 +242,10 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
       const drifting = s.grounded && speed > 6 && (Math.abs(vLat) > 3.5 || braking);
       const targetDriftYaw = drifting ? THREE.MathUtils.clamp(slip * 0.85, -0.55, 0.55) : 0;
       leanRef.current.rotation.y += (targetDriftYaw - leanRef.current.rotation.y) * (1 - Math.exp(-7 * dt));
+
+      // Engine + tire sounds follow the same drift/speed state as the visuals.
+      updateEngine(speed / MAX_SPEED, forward, racing);
+      updateSkid(drifting ? Math.min(1, (Math.abs(vLat) + (braking ? 3 : 0)) / 9) : 0);
 
       // Lay tire marks on the asphalt under the rear wheels while drifting.
       if (drifting) {
