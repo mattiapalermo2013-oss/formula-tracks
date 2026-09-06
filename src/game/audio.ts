@@ -17,7 +17,7 @@ let skidGain: GainNode | null = null;
 let enabled = true;
 
 // gearbox state
-const GEARS = 8;
+const GEARS = 6;
 let gear = 1;
 let shiftUntil = 0;
 
@@ -156,7 +156,7 @@ export function updateEngine(speedRatio: number, throttle: number, active: boole
   const nextGear = gearFor(r);
   if (nextGear !== gear) {
     // Upshift/downshift: momentary cut, like an F1 seamless-shift blip.
-    shiftUntil = t + (nextGear > gear ? 0.08 : 0.06);
+    shiftUntil = t + (nextGear > gear ? 0.18 : 0.14);
     gear = nextGear;
   }
   const shifting = t < shiftUntil;
@@ -164,11 +164,12 @@ export function updateEngine(speedRatio: number, throttle: number, active: boole
   // Revs climb inside each gear and drop on the upshift — that's the "cambiata".
   const span = 1 / GEARS;
   const inGear = Math.min(1, Math.max(0, (r - (gear - 1) * span) / span));
-  const rpm = 0.28 + inGear * 0.72; // 0..1 normalized rev range
+  // Long, high-revving pull: start low in the gear, scream at the top before shifting.
+  const rpm = 0.22 + Math.pow(inGear, 1.15) * 0.78; // 0..1 normalized rev range
 
-  const base = 42 + rpm * 165 + throttle * 12;
+  const base = 38 + rpm * 235 + throttle * 14;
   for (const p of partials) {
-    p.osc.frequency.setTargetAtTime(base * p.mult, t, shifting ? 0.02 : 0.045);
+    p.osc.frequency.setTargetAtTime(base * p.mult, t, shifting ? 0.02 : 0.05);
   }
   engFilter.frequency.setTargetAtTime(700 + rpm * 4200 + r * 1200, t, 0.06);
 
