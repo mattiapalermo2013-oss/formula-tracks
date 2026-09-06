@@ -6,12 +6,50 @@ import {
   useControlsStore,
   type ControlAction,
 } from "./controlsStore";
-import { useT } from "./i18n";
+import { useI18nStore, useT, type Lang } from "./i18n";
+import { useSettingsStore, type SpeedUnit } from "./settingsStore";
 
 const ACTIONS = Object.keys(DEFAULT_BINDINGS) as ControlAction[];
 
+function ToggleRow<T extends string>({
+  label,
+  options,
+  value,
+  onPick,
+}: {
+  label: string;
+  options: { id: T; text: string }[];
+  value: T;
+  onPick: (v: T) => void;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-border/40 bg-background/40 px-4 py-2.5">
+      <span className="text-sm text-foreground">{label}</span>
+      <div className="flex gap-1 rounded-full border border-border/60 bg-card p-1">
+        {options.map((o) => (
+          <button
+            key={o.id}
+            onClick={() => onPick(o.id)}
+            className={`rounded-full px-3 py-1 text-[0.65rem] font-bold uppercase tracking-widest transition-colors ${
+              value === o.id
+                ? "bg-primary text-primary-foreground"
+                : "text-foreground hover:bg-foreground/10"
+            }`}
+          >
+            {o.text}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function ControlsPanel({ onClose }: { onClose: () => void }) {
   const t = useT();
+  const lang = useI18nStore((s) => s.lang);
+  const setLang = useI18nStore((s) => s.setLang);
+  const units = useSettingsStore((s) => s.units);
+  const setUnits = useSettingsStore((s) => s.setUnits);
   const bindings = useControlsStore((s) => s.bindings);
   const setBinding = useControlsStore((s) => s.setBinding);
   const resetDefaults = useControlsStore((s) => s.resetDefaults);
@@ -33,7 +71,7 @@ export function ControlsPanel({ onClose }: { onClose: () => void }) {
     <div className="pointer-events-auto mt-6 w-full max-w-md rounded-2xl border border-border/50 bg-card/90 p-4 backdrop-blur-md sm:p-6">
       <div className="flex items-center justify-between">
         <h2 className="text-sm font-bold uppercase tracking-[0.3em] text-foreground">
-          {t("controls.title")}
+          {t("menu.settings")}
         </h2>
         <button
           className="text-xs font-semibold uppercase tracking-widest text-muted-foreground hover:text-foreground"
@@ -42,10 +80,32 @@ export function ControlsPanel({ onClose }: { onClose: () => void }) {
           {t("controls.close")}
         </button>
       </div>
-      <p className="mt-2 text-xs text-muted-foreground">
+
+      <div className="mt-4 space-y-2">
+        <ToggleRow<Lang>
+          label={t("settings.language")}
+          value={lang}
+          onPick={setLang}
+          options={[
+            { id: "en", text: "EN" },
+            { id: "it", text: "IT" },
+          ]}
+        />
+        <ToggleRow<SpeedUnit>
+          label={t("settings.units")}
+          value={units}
+          onPick={setUnits}
+          options={[
+            { id: "kmh", text: t("settings.kmh") },
+            { id: "mph", text: t("settings.mph") },
+          ]}
+        />
+      </div>
+
+      <p className="mt-4 text-xs text-muted-foreground">
         {t("controls.hint")}
       </p>
-      <div className="mt-4 max-h-[50vh] space-y-2 overflow-y-auto pr-1 overscroll-contain">
+      <div className="mt-4 max-h-[45vh] space-y-2 overflow-y-auto pr-1 overscroll-contain">
         {ACTIONS.map((action) => (
           <div
             key={action}
