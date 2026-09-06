@@ -208,7 +208,7 @@ export function Hud() {
             <Stat label="Record" value={bestLap ? formatTime(bestLap) : "--:--"} accent />
           </div>
 
-          <div className="absolute bottom-3 right-3 rounded-xl border border-border/40 bg-card/80 px-4 py-2 text-right backdrop-blur-md sm:bottom-6 sm:right-6 sm:px-6 sm:py-3">
+          <div className="absolute bottom-3 right-3 rounded-xl border border-border/40 bg-card/80 px-4 py-2 text-right backdrop-blur-md sm:bottom-6 sm:right-6 sm:px-6 sm:py-3 [@media(pointer:coarse)]:bottom-40">
             <div className="font-mono text-3xl font-bold tabular-nums text-foreground sm:text-5xl">
               {speed}
             </div>
