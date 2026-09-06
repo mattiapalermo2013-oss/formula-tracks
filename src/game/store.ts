@@ -78,6 +78,7 @@ export const useRaceStore = create<RaceStore>((set, get) => ({
       useBestTimesStore.getState().record(slot, total, splits);
       set({ bestLap: useBestTimesStore.getState().bestFor(slot) });
       void useLeaderboardStore.getState().submit(slot, total);
+      void submitCrazyScore(total);
     }
   },
   reset: () =>
