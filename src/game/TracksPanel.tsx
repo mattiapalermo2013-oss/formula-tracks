@@ -178,55 +178,17 @@ export function TracksPanel({ onClose }: { onClose: () => void }) {
             </button>
           </div>
 
-          <div className="mt-5 border-t border-border/50 pt-4 text-xs">
-            {isAdmin ? (
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="text-muted-foreground">{t("tracks.admin")}: {email}</span>
-                <div className="flex gap-2">
-                  <button
-                    onClick={openEditor}
-                    className="rounded-full bg-primary px-4 py-2 font-bold uppercase tracking-widest text-primary-foreground"
-                  >
-                    {t("tracks.editTrack")}
-                  </button>
-                  <button
-                    onClick={signOut}
-                    className="rounded-full border border-border/60 px-4 py-2 font-bold uppercase tracking-widest text-foreground"
-                  >
-                    {t("tracks.signOut")}
-                  </button>
-                </div>
-              </div>
-            ) : email ? (
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="text-muted-foreground">{t("tracks.connected")}: {email}</span>
-                <div className="flex gap-2">
-                  <button
-                    onClick={claimAdmin}
-                    className="rounded-full border border-border/60 px-4 py-2 font-bold uppercase tracking-widest text-foreground"
-                  >
-                    {t("tracks.becomeAdmin")}
-                  </button>
-                  <button
-                    onClick={signOut}
-                    className="rounded-full border border-border/60 px-4 py-2 font-bold uppercase tracking-widest text-foreground"
-                  >
-                    {t("tracks.signOut")}
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center justify-between gap-2">
-                <span className="text-muted-foreground">{t("tracks.sameForAll")}</span>
-                <a
-                  href="/auth"
-                  className="rounded-full border border-border/60 px-4 py-2 font-bold uppercase tracking-widest text-foreground"
-                >
-                  {t("tracks.staffAccess")}
-                </a>
-              </div>
-            )}
-          </div>
+          {isAdmin && (
+            <div className="mt-5 flex items-center justify-between gap-2 border-t border-border/50 pt-4 text-xs">
+              <span className="text-muted-foreground">{t("staff.unlocked")}</span>
+              <button
+                onClick={openEditor}
+                className="rounded-full bg-primary px-4 py-2 font-bold uppercase tracking-widest text-primary-foreground"
+              >
+                {t("tracks.editTrack")}
+              </button>
+            </div>
+          )}
         </>
       )}
     </div>
