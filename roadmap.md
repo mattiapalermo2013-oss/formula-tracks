@@ -7,5 +7,7 @@
 - [x] Cambiata più lenta e a giri più alti
 - [x] Integrazione SDK CrazyGames: script nel root head e invio punteggio a fine giro
 
-- [ ] Pit lane + giri continui (in corso)
+- [x] Pit lane + giri continui
+- [x] Rollio anomalo in retromarcia (slip ~180°) corretto
+- [x] Scritta ultimo giro scompare dopo ~6.5s
 - [ ] Azzerare tutti i record mondiali (lap_times) dopo il cambio velocità

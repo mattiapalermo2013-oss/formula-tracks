@@ -314,7 +314,7 @@ export function Hud() {
             </>
           )}
 
-          {lastLap !== null && phase === "racing" && (
+          {lastLap !== null && bannerVisible && phase === "racing" && (
             <div className="absolute left-1/2 top-16 -translate-x-1/2 rounded-full border border-border/40 bg-card/80 px-4 py-1.5 font-mono text-xs text-foreground backdrop-blur-md sm:top-6 sm:px-5 sm:py-2 sm:text-sm">
               {t("hud.lastLap")} {formatTime(lastLap)}
             </div>

@@ -275,7 +275,10 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
     if (leanRef.current) {
       const speed = Math.hypot(s.vx, s.vz);
       const va = Math.atan2(s.vx, s.vz);
-      const slip = speed > 0.5 ? Math.atan2(Math.sin(va - s.yaw), Math.cos(va - s.yaw)) : 0;
+      // In reverse the velocity points opposite to the nose: compare it to the
+      // rear direction, otherwise the ~180° slip reads as a full side roll.
+      const slipRef = vLong < -0.5 ? s.yaw + Math.PI : s.yaw;
+      const slip = speed > 0.5 ? Math.atan2(Math.sin(va - slipRef), Math.cos(va - slipRef)) : 0;
       const targetRoll = THREE.MathUtils.clamp(-slip * 0.25, -0.2, 0.2);
       leanRef.current.rotation.z += (targetRoll - leanRef.current.rotation.z) * (1 - Math.exp(-6 * dt));
       const targetPitch = s.grounded ? 0 : THREE.MathUtils.clamp(-s.vy * 0.02, -0.15, 0.25);
