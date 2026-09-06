@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
-import { HALF_WIDTH, distanceToTrack, pitExtensionAt, seededRandom, type Track } from "./track";
+import { HALF_WIDTH, distanceToTrack, pitExtensionAt, pitGapAt, seededRandom, type Track } from "./track";
 import { useTrackStore } from "./trackStore";
 
 function buildRibbon(track: Track, extra: number, yOffset: number) {
@@ -245,7 +245,9 @@ function buildPitRibbon(track: Track) {
   const side = track.pit ? track.pit.side : 1;
   idx.forEach((j, i) => {
     const s = track.samples[j]!;
-    const inner = s.half - 0.1;
+    // Asphalt starts past the separator strip, so the lane is visually
+    // detached from the main straight and joins it only at the ramps.
+    const inner = s.half + pitGapAt(track, j) - 0.1;
     const outer = s.half + pitExtensionAt(track, j);
     positions[i * 6 + 0] = s.pos.x + s.right.x * inner * side;
     positions[i * 6 + 1] = s.pos.y + 0.03;
@@ -285,6 +287,30 @@ function PitLane({ track }: { track: Track }) {
     }
     return out;
   }, [track]);
+  // Low wall in the separator strip, closed along the lane and open at the
+  // entry/exit ramps where the strip tapers away.
+  const pitWall = useMemo(() => {
+    if (!pit) return [];
+    const idx = pitIndices(track);
+    const out: { x: number; y: number; z: number; yaw: number; len: number }[] = [];
+    for (let i = 0; i < idx.length - 2; i += 2) {
+      const j = idx[i]!;
+      const j2 = idx[i + 2]!;
+      const s = track.samples[j]!;
+      const s2 = track.samples[j2]!;
+      const gap = pitGapAt(track, j);
+      if (gap < 2.2) continue;
+      const off = s.half + gap / 2;
+      out.push({
+        x: s.pos.x + s.right.x * off * pit.side,
+        y: s.pos.y,
+        z: s.pos.z + s.right.y * off * pit.side,
+        yaw: Math.atan2(s.tangent.x, s.tangent.z),
+        len: Math.hypot(s2.pos.x - s.pos.x, s2.pos.z - s.pos.z) + 0.35,
+      });
+    }
+    return out;
+  }, [track]);
 
   if (!pit || !ribbon) return null;
   const boxSample = track.samples[pit.box]!;
@@ -313,6 +339,14 @@ function PitLane({ track }: { track: Track }) {
           <meshStandardMaterial color="#4b5259" flatShading />
         </mesh>
       </group>
+      {pitWall.map((w, i) => (
+        <group key={i} position={[w.x, w.y, w.z]} rotation={[0, w.yaw, 0]}>
+          <mesh position={[0, 0.28, 0]} castShadow>
+            <boxGeometry args={[0.35, 0.56, w.len]} />
+            <meshStandardMaterial color={i % 2 === 0 ? "#e8e8e8" : "#d43a2e"} flatShading />
+          </mesh>
+        </group>
+      ))}
       {garages.map((g, i) => (
         <group key={i} position={[g.x, g.y, g.z]} rotation={[0, g.yaw, 0]}>
           <mesh position={[0, 2.1, 0]} castShadow receiveShadow>
