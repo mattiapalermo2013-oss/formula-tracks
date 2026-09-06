@@ -222,7 +222,7 @@ export function Hud() {
       return;
     }
     setBannerVisible(true);
-    const id = window.setTimeout(() => setBannerVisible(false), 4000);
+    const id = window.setTimeout(() => setBannerVisible(false), 6500);
     return () => window.clearTimeout(id);
   }, [lapBanner?.key]);
 
