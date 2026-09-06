@@ -7,6 +7,7 @@ import { useKeyboard } from "./useKeyboard";
 import { useRaceStore } from "./store";
 import { CarModel } from "./CarModel";
 import { useControlsStore } from "./controlsStore";
+import { touchInput } from "./touchControls";
 
 // Feel constants — tune these, not the model.
 const ACCEL = 34;
@@ -86,13 +87,16 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
 
     const b = useControlsStore.getState().bindings;
     const forward = racing
-      ? (k.has(b.accelerate) || k.has("ArrowUp") ? 1 : 0) - (k.has(b.brake) || k.has("ArrowDown") ? 1 : 0)
+      ? (k.has(b.accelerate) || k.has("ArrowUp") || touchInput.accelerate ? 1 : 0) -
+        (k.has(b.brake) || k.has("ArrowDown") || touchInput.brake ? 1 : 0)
       : 0;
     const steer = racing
-      ? (k.has(b.left) || k.has("ArrowLeft") ? 1 : 0) - (k.has(b.right) || k.has("ArrowRight") ? 1 : 0)
+      ? (k.has(b.left) || k.has("ArrowLeft") || touchInput.left ? 1 : 0) -
+        (k.has(b.right) || k.has("ArrowRight") || touchInput.right ? 1 : 0)
       : 0;
-    const braking = racing && (b.handbrake !== "" && k.has(b.handbrake));
-    const resetPressed = b.reset !== "" && k.has(b.reset);
+    const braking =
+      racing && ((b.handbrake !== "" && k.has(b.handbrake)) || touchInput.handbrake);
+    const resetPressed = (b.reset !== "" && k.has(b.reset)) || touchInput.reset;
 
     if (resetPressed && !lastResetKey.current && racing) {
       // Full reset: back to the start line, stopped, with the clock cleared.
