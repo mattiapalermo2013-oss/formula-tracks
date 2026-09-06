@@ -77,6 +77,7 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
       started: phase === "racing",
       timerStarted: false,
     });
+    lastStoreSync.current = -1;
     clearSkids();
   }, [phase, track]);
 
