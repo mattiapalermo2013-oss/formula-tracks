@@ -142,12 +142,12 @@ function LiveryPanel({ onClose }: { onClose: () => void }) {
 
 function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
-    <div className="min-w-24">
-      <div className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-foreground/50">
+    <div className="min-w-16 sm:min-w-24">
+      <div className="text-[0.55rem] font-semibold uppercase tracking-[0.2em] text-foreground/50 sm:text-[0.65rem]">
         {label}
       </div>
       <div
-        className={`font-mono text-2xl font-bold tabular-nums ${
+        className={`font-mono text-lg font-bold tabular-nums sm:text-2xl ${
           accent ? "text-primary" : "text-foreground"
         }`}
       >
@@ -202,13 +202,13 @@ export function Hud() {
     <div className="pointer-events-none fixed inset-0 z-10 select-none">
       {(phase === "racing" || phase === "finished") && (
         <>
-          <div className="absolute left-4 top-4 flex gap-5 rounded-xl border border-border/40 bg-card/80 px-5 py-3 backdrop-blur-md">
+          <div className="absolute left-2 top-2 flex gap-3 rounded-xl border border-border/40 bg-card/80 px-3 py-2 backdrop-blur-md sm:left-4 sm:top-4 sm:gap-5 sm:px-5 sm:py-3">
             <Stat label="Tempo" value={formatTime(elapsed)} />
             <Stat label="Record" value={bestLap ? formatTime(bestLap) : "--:--"} accent />
           </div>
 
-          <div className="absolute bottom-6 right-6 rounded-xl border border-border/40 bg-card/80 px-6 py-3 text-right backdrop-blur-md">
-            <div className="font-mono text-5xl font-bold tabular-nums text-foreground">
+          <div className="absolute bottom-3 right-3 rounded-xl border border-border/40 bg-card/80 px-4 py-2 text-right backdrop-blur-md sm:bottom-6 sm:right-6 sm:px-6 sm:py-3">
+            <div className="font-mono text-3xl font-bold tabular-nums text-foreground sm:text-5xl">
               {speed}
             </div>
             <div className="text-[0.65rem] font-semibold uppercase tracking-[0.25em] text-foreground/50">
@@ -216,11 +216,11 @@ export function Hud() {
             </div>
           </div>
 
-          <div className="absolute bottom-6 left-6 flex items-center gap-2">
+          <div className="absolute bottom-4 left-3 flex items-center gap-1.5 sm:bottom-6 sm:left-6 sm:gap-2">
             {Array.from({ length: gates }, (_, i) => i).map((i) => (
               <span
                 key={i}
-                className={`h-2 w-10 rounded-full ${
+                className={`h-1.5 w-5 rounded-full sm:h-2 sm:w-10 ${
                   i < checkpoint ? "bg-primary" : "bg-foreground/20"
                 }`}
               />
@@ -229,7 +229,7 @@ export function Hud() {
 
           {phase === "racing" && (
             <button
-              className="pointer-events-auto absolute right-4 top-4 rounded-full border border-border/60 bg-card/80 px-5 py-2 text-xs font-bold uppercase tracking-widest text-foreground backdrop-blur-md transition-colors hover:bg-foreground/10"
+              className="pointer-events-auto absolute right-2 top-2 rounded-full border border-border/60 bg-card/80 px-3 py-1.5 text-[0.65rem] font-bold uppercase tracking-widest text-foreground backdrop-blur-md transition-colors hover:bg-foreground/10 sm:right-4 sm:top-4 sm:px-5 sm:py-2 sm:text-xs"
               onClick={reset}
             >
               Menu <span className="font-mono text-foreground/50">[Esc]</span>
@@ -237,7 +237,7 @@ export function Hud() {
           )}
 
           {splitVisible && lastSplit && phase === "racing" && (
-            <div className="absolute left-1/2 top-24 -translate-x-1/2 rounded-xl border border-border/40 bg-card/85 px-6 py-3 text-center backdrop-blur-md">
+            <div className="absolute left-1/2 top-28 -translate-x-1/2 rounded-xl border border-border/40 bg-card/85 px-4 py-2 text-center backdrop-blur-md sm:top-24 sm:px-6 sm:py-3">
               <div className="text-[0.65rem] font-semibold uppercase tracking-[0.25em] text-foreground/50">
                 Settore {lastSplit.index + 1}
               </div>
@@ -258,7 +258,7 @@ export function Hud() {
           )}
 
           {lastLap !== null && phase === "racing" && (
-            <div className="absolute left-1/2 top-6 -translate-x-1/2 rounded-full border border-border/40 bg-card/80 px-5 py-2 font-mono text-sm text-foreground backdrop-blur-md">
+            <div className="absolute left-1/2 top-16 -translate-x-1/2 rounded-full border border-border/40 bg-card/80 px-4 py-1.5 font-mono text-xs text-foreground backdrop-blur-md sm:top-6 sm:px-5 sm:py-2 sm:text-sm">
               Ultimo giro {formatTime(lastLap)}
             </div>
           )}
@@ -266,7 +266,7 @@ export function Hud() {
       )}
 
       {phase === "ready" && (
-        <div className="pointer-events-auto absolute inset-0 flex flex-col items-center overflow-y-auto bg-background/70 py-6 backdrop-blur-sm">
+        <div className="pointer-events-auto absolute inset-0 flex flex-col items-center overflow-y-auto bg-background/70 px-3 py-6 backdrop-blur-sm">
           <div className="my-auto flex flex-col items-center">
           <div className="mb-4 flex items-center gap-3">
             {userId ? (
@@ -285,7 +285,7 @@ export function Hud() {
           <p className="text-xs font-semibold uppercase tracking-[0.45em] text-primary">
             Arcade racing
           </p>
-          <h1 className="mt-3 text-6xl font-black tracking-tight text-foreground sm:text-7xl">
+          <h1 className="mt-3 text-4xl font-black tracking-tight text-foreground sm:text-7xl">
             F1-TRACK
           </h1>
           <p className="mt-3 max-w-md text-center text-sm text-muted-foreground">
@@ -354,9 +354,9 @@ export function Hud() {
 
       {phase === "finished" && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/60 backdrop-blur-sm">
-          <div className="rounded-2xl border border-border/50 bg-card/90 px-12 py-10 text-center">
-            <h2 className="text-4xl font-black tracking-tight text-foreground">GIRO COMPLETATO</h2>
-            <p className="mt-6 font-mono text-5xl font-bold tabular-nums text-primary">
+          <div className="pointer-events-auto max-h-[90vh] w-[min(92vw,32rem)] overflow-y-auto overscroll-contain rounded-2xl border border-border/50 bg-card/90 px-5 py-8 text-center sm:px-12 sm:py-10">
+            <h2 className="text-2xl font-black tracking-tight text-foreground sm:text-4xl">GIRO COMPLETATO</h2>
+            <p className="mt-6 font-mono text-3xl font-bold tabular-nums text-primary sm:text-5xl">
               {raceTime !== null ? formatTime(raceTime) : "--"}
             </p>
             {raceDelta !== null ? (
