@@ -215,19 +215,46 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
           s.checkpoint += 1;
         }
       }
+      // Crossing the line closes the lap and immediately opens the next one:
+      // the clock restarts from zero while the car keeps all of its speed.
       if (s.trackIdx < 20 && s.checkpoint >= trk.checkpoints.length) {
-        const lapTime = s.elapsed - s.lapStart;
-        store.completeLap(lapTime);
+        const lapTime = s.elapsed;
+        const outLap = s.lap === 1;
+        store.completeLap(lapTime, outLap);
+        s.lap += 1;
         s.checkpoint = 0;
-        store.finishRace(lapTime, lapTime);
-        // respawn stationary on the start line
-        Object.assign(s, spawnAt(trk, 2), {
-          vx: 0, vz: 0, vy: 0, grounded: true, trackIdx: 2,
-          lap: 1, checkpoint: 0, lapStart: 0, elapsed: 0,
-          timerStarted: false,
-        });
+        s.elapsed = 0;
+        s.lapStart = 0;
         lastStoreSync.current = -1;
         clearSkids();
+      }
+
+      // --- Pit lane: stop in the box, wait three seconds, launch again.
+      if (trk.pit) {
+        const extra = pitExtensionAt(trk, s.trackIdx);
+        const halfHere = trk.samples[s.trackIdx]!.half;
+        const inLane = extra > 1.5 && hit.lat * trk.pit.side > halfHere - 1.2;
+        const dBox = Math.abs(((s.trackIdx - trk.pit.box + trk.count * 1.5) % trk.count) - trk.count * 0.5);
+        const speedNow = Math.hypot(s.vx, s.vz);
+        if (!inLane) {
+          s.pitTimer = 0;
+          s.pitDone = false;
+          store.setPit(null);
+        } else if (!s.pitDone && dBox <= 6 && speedNow < 2.5) {
+          s.pitTimer += dt;
+          store.setPit(Math.max(0, PIT_STOP_SECONDS - s.pitTimer));
+          if (s.pitTimer >= PIT_STOP_SECONDS) {
+            s.pitDone = true;
+            store.pitReady();
+            clearSkids();
+            // Small launch out of the box.
+            s.vx += Math.sin(s.yaw) * 9;
+            s.vz += Math.cos(s.yaw) * 9;
+          }
+        } else if (!s.pitDone) {
+          s.pitTimer = 0;
+          store.setPit(null);
+        }
       }
       store.setProgress(s.lap, s.checkpoint);
     }
