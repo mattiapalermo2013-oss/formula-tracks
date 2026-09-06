@@ -3,8 +3,10 @@ import { PIECE_DEFS } from "./blocks";
 import { useTrackStore } from "./trackStore";
 import { useRaceStore } from "./store";
 import { useTracksStore } from "./tracksStore";
+import { useT } from "./i18n";
 
 export function Editor() {
+  const t = useT();
   const phase = useRaceStore((s) => s.phase);
   const startRace = useRaceStore((s) => s.startRace);
   const { pieces, track, add, undo, clear, useDefault } = useTrackStore();
@@ -25,10 +27,10 @@ export function Editor() {
     <div className="pointer-events-none fixed inset-0 z-20 select-none">
       <div className="pointer-events-auto absolute left-2 right-2 top-2 max-h-[calc(100vh-6rem)] overflow-y-auto overscroll-contain rounded-2xl border border-border/40 bg-card/90 p-4 backdrop-blur-md sm:left-4 sm:right-auto sm:top-4 sm:w-72 sm:max-h-[calc(100vh-2rem)]">
         <h2 className="text-lg font-black uppercase tracking-tight text-foreground">
-          Costruisci la pista
+          {t("editor.title")}
         </h2>
         <p className="mt-1 text-xs text-muted-foreground">
-          Aggiungi blocchi in sequenza: il circuito si chiude da solo fino al traguardo.
+          {t("editor.intro")}
         </p>
 
         <div className="mt-4 grid grid-cols-2 gap-2">
@@ -36,12 +38,12 @@ export function Editor() {
             <button
               key={p.type}
               onClick={() => add(p.type)}
-              title={p.hint}
+              title={t(p.hint)}
               className="rounded-lg border border-border/50 bg-background/60 px-2 py-2 text-left transition-colors hover:border-primary hover:bg-primary/10"
             >
               <span className="font-mono text-base text-primary">{p.glyph}</span>
               <span className="mt-0.5 block text-[0.7rem] font-semibold leading-tight text-foreground">
-                {p.label}
+                {t(p.label)}
               </span>
             </button>
           ))}
@@ -53,24 +55,24 @@ export function Editor() {
             disabled={pieces.length === 0}
             className="flex-1 rounded-lg border border-border/50 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-foreground transition-colors hover:bg-foreground/10 disabled:opacity-40"
           >
-            Annulla
+            {t("editor.undo")}
           </button>
           <button
             onClick={clear}
             className="flex-1 rounded-lg border border-border/50 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-foreground transition-colors hover:bg-foreground/10"
           >
-            Svuota
+            {t("editor.clear")}
           </button>
           <button
             onClick={useDefault}
             className="flex-1 rounded-lg border border-border/50 px-3 py-2 text-xs font-semibold uppercase tracking-wider text-foreground transition-colors hover:bg-foreground/10"
           >
-            Demo
+            {t("editor.demo")}
           </button>
         </div>
 
         <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
-          <span>{pieces.length} blocchi</span>
+          <span>{pieces.length} {t("editor.blocks")}</span>
           <span>{Math.round(track.length)} m</span>
         </div>
 
@@ -78,13 +80,13 @@ export function Editor() {
           onClick={startRace}
           className="mt-3 w-full rounded-full bg-primary px-6 py-3 text-sm font-bold uppercase tracking-widest text-primary-foreground transition-transform hover:scale-[1.03]"
         >
-          Corri su questa pista
+          {t("editor.race")}
         </button>
 
         {isAdmin && (
           <div className="mt-4 border-t border-border/50 pt-4">
             <p className="mb-2 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-foreground/50">
-              Salva su slot ufficiale
+              {t("editor.saveSlot")}
             </p>
             <select
               value={selected ?? ""}
@@ -92,7 +94,7 @@ export function Editor() {
               className="w-full rounded-lg border border-border/60 bg-background px-2 py-2 text-xs text-foreground outline-none focus:border-primary"
             >
               <option value="" disabled>
-                Scegli slot
+                {t("editor.chooseSlot")}
               </option>
               {tracks.map((t) => (
                 <option key={t.slot} value={t.slot}>
@@ -103,7 +105,7 @@ export function Editor() {
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Nome della pista"
+              placeholder={t("editor.trackName")}
               className="mt-2 w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-sm text-foreground outline-none focus:border-primary"
             />
             <button
@@ -115,11 +117,12 @@ export function Editor() {
               }}
               className="mt-2 w-full rounded-full border border-primary bg-primary/15 px-6 py-2.5 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-primary/25 disabled:opacity-40"
             >
-              {saving ? "Salvo…" : "Salva pista"}
+              {saving ? t("editor.saving") : t("editor.save")}
             </button>
             {savedAt && !error && (
-              <p className="mt-2 text-[0.7rem] text-muted-foreground">Pista salvata.</p>
+              <p className="mt-2 text-[0.7rem] text-muted-foreground">{t("editor.saved")}</p>
             )}
+
             {error && <p className="mt-2 text-[0.7rem] text-destructive">{error}</p>}
           </div>
         )}
@@ -128,14 +131,14 @@ export function Editor() {
       <div className="pointer-events-auto absolute bottom-4 left-1/2 max-w-[90vw] -translate-x-1/2 overflow-x-auto rounded-full border border-border/40 bg-card/85 px-4 py-2 backdrop-blur-md">
         <div className="flex items-center gap-1.5">
           {pieces.length === 0 && (
-            <span className="px-2 text-xs text-muted-foreground">Nessun blocco</span>
+            <span className="px-2 text-xs text-muted-foreground">{t("editor.noBlocks")}</span>
           )}
           {pieces.map((p, i) => {
             const def = PIECE_DEFS.find((d) => d.type === p)!;
             return (
               <span
                 key={i}
-                title={def.label}
+                title={t(def.label)}
                 className="rounded-md bg-background/70 px-2 py-1 font-mono text-xs text-foreground"
               >
                 {def.glyph}
@@ -146,7 +149,7 @@ export function Editor() {
       </div>
 
       <p className="absolute bottom-16 right-2 rounded-lg border border-border/40 bg-card/80 px-3 py-2 text-xs text-muted-foreground backdrop-blur-md sm:bottom-auto sm:right-4 sm:top-4">
-        Trascina per ruotare · rotella per zoom
+        {t("editor.cameraHint")}
       </p>
     </div>
   );

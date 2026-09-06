@@ -17,6 +17,7 @@ import { useLeaderboardStore } from "./leaderboardStore";
 import { ControlsPanel } from "./ControlsPanel";
 import { RotateOverlay, TouchControls } from "./TouchControls";
 import { keyName, useControlsStore } from "./controlsStore";
+import { useI18nStore, useT, type Lang } from "./i18n";
 
 function Turntable() {
   const ref = useRef<THREE.Group>(null);
@@ -50,11 +51,32 @@ function CarPreview() {
 }
 
 const PATTERNS: { id: LiveryPattern; label: string }[] = [
-  { id: "solid", label: "Tinta unita" },
-  { id: "stripes", label: "Strisce" },
-  { id: "rally", label: "Rally" },
-  { id: "split", label: "Bicolore" },
+  { id: "solid", label: "livery.solid" },
+  { id: "stripes", label: "livery.stripes" },
+  { id: "rally", label: "livery.rally" },
+  { id: "split", label: "livery.split" },
 ];
+
+function LanguageSwitch() {
+  const lang = useI18nStore((s) => s.lang);
+  const setLang = useI18nStore((s) => s.setLang);
+  const langs: Lang[] = ["en", "it"];
+  return (
+    <div className="pointer-events-auto flex gap-1 rounded-full border border-border/60 bg-card/70 p-1">
+      {langs.map((l) => (
+        <button
+          key={l}
+          onClick={() => setLang(l)}
+          className={`rounded-full px-3 py-1 text-[0.65rem] font-bold uppercase tracking-widest transition-colors ${
+            lang === l ? "bg-primary text-primary-foreground" : "text-foreground hover:bg-foreground/10"
+          }`}
+        >
+          {l}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 function Swatches({
   colors,
@@ -83,32 +105,33 @@ function Swatches({
 }
 
 function LiveryPanel({ onClose }: { onClose: () => void }) {
+  const t = useT();
   const { body, accent, pattern, number, setBody, setAccent, setPattern, setNumber } =
     useLiveryStore();
   return (
     <div className="pointer-events-auto mt-6 w-full max-w-md overflow-y-auto overscroll-contain rounded-2xl border border-border/50 bg-card/90 p-4 backdrop-blur-md sm:p-6" style={{ maxHeight: "min(70vh, 640px)" }}>
       <div className="mb-4 flex items-center justify-between">
         <h2 className="text-sm font-bold uppercase tracking-[0.25em] text-foreground">
-          Officina
+          {t("livery.title")}
         </h2>
         <button
           onClick={onClose}
           className="rounded-full border border-border/60 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
         >
-          Chiudi
+          {t("livery.close")}
         </button>
       </div>
       <CarPreview />
       <p className="mb-2 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-foreground/50">
-        Carrozzeria
+        {t("livery.body")}
       </p>
       <Swatches colors={BODY_COLORS} value={body} onPick={setBody} />
       <p className="mb-2 mt-4 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-foreground/50">
-        Accento
+        {t("livery.accent")}
       </p>
       <Swatches colors={ACCENT_COLORS} value={accent} onPick={setAccent} />
       <p className="mb-2 mt-4 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-foreground/50">
-        Livrea
+        {t("livery.pattern")}
       </p>
       <div className="flex flex-wrap justify-center gap-2">
         {PATTERNS.map((p) => (
@@ -121,12 +144,12 @@ function LiveryPanel({ onClose }: { onClose: () => void }) {
                 : "border-border/60 text-foreground hover:bg-foreground/10"
             }`}
           >
-            {p.label}
+            {t(p.label)}
           </button>
         ))}
       </div>
       <p className="mb-2 mt-4 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-foreground/50">
-        Numero di gara
+        {t("livery.number")}
       </p>
       <div className="flex justify-center">
         <input
@@ -159,6 +182,7 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
 }
 
 export function Hud() {
+  const t = useT();
   const { phase, checkpoint, speed, elapsed, lastLap, bestLap, raceTime, raceDelta, lastSplit, startRace, reset, openEditor } =
     useRaceStore();
   const gates = useTrackStore((s) => s.track.checkpoints.length);
@@ -204,8 +228,8 @@ export function Hud() {
       {(phase === "racing" || phase === "finished") && (
         <>
           <div className="absolute left-2 top-2 flex gap-3 rounded-xl border border-border/40 bg-card/80 px-3 py-2 backdrop-blur-md sm:left-4 sm:top-4 sm:gap-5 sm:px-5 sm:py-3">
-            <Stat label="Tempo" value={formatTime(elapsed)} />
-            <Stat label="Record" value={bestLap ? formatTime(bestLap) : "--:--"} accent />
+            <Stat label={t("hud.time")} value={formatTime(elapsed)} />
+            <Stat label={t("hud.best")} value={bestLap ? formatTime(bestLap) : "--:--"} accent />
           </div>
 
           <div className="absolute bottom-3 right-3 rounded-xl border border-border/40 bg-card/80 px-4 py-2 text-right backdrop-blur-md sm:bottom-6 sm:right-6 sm:px-6 sm:py-3 [@media(pointer:coarse)]:bottom-auto [@media(pointer:coarse)]:left-2 [@media(pointer:coarse)]:right-auto [@media(pointer:coarse)]:top-[4.75rem]">
@@ -233,14 +257,14 @@ export function Hud() {
               className="pointer-events-auto absolute right-2 top-2 rounded-full border border-border/60 bg-card/80 px-3 py-1.5 text-[0.65rem] font-bold uppercase tracking-widest text-foreground backdrop-blur-md transition-colors hover:bg-foreground/10 sm:right-4 sm:top-4 sm:px-5 sm:py-2 sm:text-xs"
               onClick={reset}
             >
-              Menu <span className="font-mono text-foreground/50">[Esc]</span>
+              {t("hud.menu")} <span className="font-mono text-foreground/50">[Esc]</span>
             </button>
           )}
 
           {splitVisible && lastSplit && phase === "racing" && (
             <div className="absolute left-1/2 top-28 -translate-x-1/2 rounded-xl border border-border/40 bg-card/85 px-4 py-2 text-center backdrop-blur-md sm:top-24 sm:px-6 sm:py-3">
               <div className="text-[0.65rem] font-semibold uppercase tracking-[0.25em] text-foreground/50">
-                Settore {lastSplit.index + 1}
+                {t("hud.sector")} {lastSplit.index + 1}
               </div>
               <div className="font-mono text-2xl font-bold tabular-nums text-foreground">
                 {formatTime(lastSplit.time)}
@@ -267,7 +291,7 @@ export function Hud() {
 
           {lastLap !== null && phase === "racing" && (
             <div className="absolute left-1/2 top-16 -translate-x-1/2 rounded-full border border-border/40 bg-card/80 px-4 py-1.5 font-mono text-xs text-foreground backdrop-blur-md sm:top-6 sm:px-5 sm:py-2 sm:text-sm">
-              Ultimo giro {formatTime(lastLap)}
+              {t("hud.lastLap")} {formatTime(lastLap)}
             </div>
           )}
         </>
@@ -277,27 +301,28 @@ export function Hud() {
         <div className="pointer-events-auto absolute inset-0 flex flex-col items-center overflow-y-auto bg-background/70 px-3 py-6 backdrop-blur-sm">
           <div className="my-auto flex flex-col items-center">
           <div className="mb-4 flex items-center gap-3">
+            <LanguageSwitch />
             {userId ? (
               <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">
-                Account connesso
+                {t("menu.signedIn")}
               </span>
             ) : (
               <Link
                 to="/auth"
                 className="pointer-events-auto rounded-full border border-primary px-6 py-2 text-xs font-bold uppercase tracking-widest text-primary transition-colors hover:bg-primary/10"
               >
-                Accedi
+                {t("menu.signIn")}
               </Link>
             )}
           </div>
           <p className="text-xs font-semibold uppercase tracking-[0.45em] text-primary">
-            Arcade racing
+            {t("menu.tagline")}
           </p>
           <h1 className="mt-3 text-4xl font-black tracking-tight text-foreground sm:text-7xl">
             FORMULA TRACK
           </h1>
           <p className="mt-3 max-w-md text-center text-sm text-muted-foreground">
-            Un giro lanciato sul circuito sospeso. Curve strette, rampe e un cronometro che non perdona.
+            {t("menu.intro")}
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <button
@@ -308,14 +333,14 @@ export function Hud() {
                 setShowTracks((v) => !v);
               }}
             >
-              Gioca
+              {t("menu.play")}
             </button>
             {isAdmin && (
               <button
                 className="pointer-events-auto rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
                 onClick={openEditor}
               >
-                Costruisci la pista
+                {t("menu.build")}
               </button>
             )}
             <button
@@ -326,7 +351,7 @@ export function Hud() {
                 setShowLivery((v) => !v);
               }}
             >
-              Personalizza auto
+              {t("menu.customize")}
             </button>
             <button
               className="pointer-events-auto rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
@@ -336,7 +361,7 @@ export function Hud() {
                 setShowControls((v) => !v);
               }}
             >
-              Comandi
+              {t("menu.controls")}
             </button>
           </div>
           {showTracks && <TracksPanel onClose={() => setShowTracks(false)} />}
@@ -344,12 +369,12 @@ export function Hud() {
           {showControls && <ControlsPanel onClose={() => setShowControls(false)} />}
           <div className="mt-8 flex flex-wrap justify-center gap-2 text-xs text-muted-foreground">
             {[
-              [`${keyName(bindings.accelerate)} / ↑`, "accelera"],
-              [`${keyName(bindings.brake)} / ↓`, "frena"],
-              [`${keyName(bindings.left)} ${keyName(bindings.right)} / ← →`, "sterza"],
-              [keyName(bindings.handbrake), "derapata"],
-              [keyName(bindings.reset), "reset"],
-              ["Esc", "menu"],
+              [`${keyName(bindings.accelerate)} / ↑`, t("hint.accelerate")],
+              [`${keyName(bindings.brake)} / ↓`, t("hint.brake")],
+              [`${keyName(bindings.left)} ${keyName(bindings.right)} / ← →`, t("hint.steer")],
+              [keyName(bindings.handbrake), t("hint.drift")],
+              [keyName(bindings.reset), t("hint.reset")],
+              ["Esc", t("hint.menu")],
             ].map(([k, d]) => (
               <span key={k} className="rounded-md border border-border/50 bg-card/70 px-3 py-1.5">
                 <b className="font-mono text-foreground">{k}</b> · {d}
@@ -363,7 +388,7 @@ export function Hud() {
       {phase === "finished" && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/60 backdrop-blur-sm">
           <div className="pointer-events-auto max-h-[90vh] w-[min(92vw,32rem)] overflow-y-auto overscroll-contain rounded-2xl border border-border/50 bg-card/90 px-5 py-8 text-center sm:px-12 sm:py-10">
-            <h2 className="text-2xl font-black tracking-tight text-foreground sm:text-4xl">GIRO COMPLETATO</h2>
+            <h2 className="text-2xl font-black tracking-tight text-foreground sm:text-4xl">{t("hud.lapDone")}</h2>
             <p className="mt-6 font-mono text-3xl font-bold tabular-nums text-primary sm:text-5xl">
               {raceTime !== null ? formatTime(raceTime) : "--"}
             </p>
@@ -378,29 +403,29 @@ export function Hud() {
               </p>
             ) : (
               <p className="mt-2 font-mono text-sm font-bold uppercase tracking-widest text-emerald-400">
-                Primo record
+                {t("hud.firstRecord")}
               </p>
             )}
             <p className="mt-2 text-sm text-muted-foreground">
-              Record {bestLap ? formatTime(bestLap) : "--"}
+              {t("hud.record")} {bestLap ? formatTime(bestLap) : "--"}
             </p>
             {userId ? (
               lastRank !== null && (
                 <p className="mt-4 font-mono text-sm font-bold uppercase tracking-widest text-foreground">
-                  Posizione mondiale{" "}
+                  {t("hud.worldRank")}{" "}
                   <span className="text-primary">#{lastRank}</span>
                 </p>
               )
             ) : (
               <div className="mt-4">
                 <p className="mb-2 text-xs text-muted-foreground">
-                  Accedi per salvare i tuoi progressi ed entrare in classifica
+                  {t("hud.signInPrompt")}
                 </p>
                 <a
                   href="/auth"
                   className="pointer-events-auto inline-block rounded-full border border-primary px-6 py-2 text-xs font-bold uppercase tracking-widest text-primary transition-colors hover:bg-primary/10"
                 >
-                  Accedi
+                  {t("menu.signIn")}
                 </a>
               </div>
             )}
@@ -409,20 +434,20 @@ export function Hud() {
               className="pointer-events-auto mt-8 rounded-full bg-primary px-8 py-3 text-sm font-bold uppercase tracking-widest text-primary-foreground transition-transform hover:scale-105"
               onClick={startRace}
             >
-              Riprova
+              {t("hud.retry")}
             </button>
             <button
               className="pointer-events-auto mt-3 block w-full rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
               onClick={reset}
             >
-              Torna al menu
+              {t("hud.backToMenu")}
             </button>
             {isAdmin && (
               <button
                 className="pointer-events-auto mt-3 block w-full rounded-full border border-border/60 px-8 py-3 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
                 onClick={openEditor}
               >
-                Modifica pista
+                {t("hud.editTrack")}
               </button>
             )}
           </div>

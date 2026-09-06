@@ -1,5 +1,6 @@
 import { useRef, type ReactNode } from "react";
 import { resetTouchInput, touchInput } from "./touchControls";
+import { useT } from "./i18n";
 
 type TouchAction = keyof typeof touchInput;
 
@@ -68,24 +69,25 @@ function Arrow({ dir }: { dir: "up" | "down" | "left" | "right" }) {
 
 // Rendered only on coarse-pointer (touch) devices while racing.
 export function TouchControls() {
+  const t = useT();
   return (
     <div className="pointer-events-none absolute inset-0 hidden [@media(pointer:coarse)]:block">
       {/* steering — bottom left */}
       <div className="absolute bottom-20 left-3 flex gap-3">
-        <TouchButton action="left" label="Sterza a sinistra" className="h-20 w-20">
+        <TouchButton action="left" label={t("action.left")} className="h-20 w-20">
           <Arrow dir="left" />
         </TouchButton>
-        <TouchButton action="right" label="Sterza a destra" className="h-20 w-20">
+        <TouchButton action="right" label={t("action.right")} className="h-20 w-20">
           <Arrow dir="right" />
         </TouchButton>
       </div>
 
       {/* throttle / brake — bottom right */}
       <div className="absolute bottom-20 right-3 flex gap-3">
-        <TouchButton action="brake" label="Frena" className="h-20 w-20">
+        <TouchButton action="brake" label={t("action.brake")} className="h-20 w-20">
           <Arrow dir="down" />
         </TouchButton>
-        <TouchButton action="accelerate" label="Accelera" className="h-24 w-20 bg-primary/20">
+        <TouchButton action="accelerate" label={t("action.accelerate")} className="h-24 w-20 bg-primary/20">
           <Arrow dir="up" />
         </TouchButton>
       </div>
@@ -94,17 +96,17 @@ export function TouchControls() {
       <div className="absolute bottom-48 right-3 flex gap-3">
         <TouchButton
           action="handbrake"
-          label="Freno a mano"
+          label={t("action.handbrake")}
           className="h-12 w-16 text-[0.6rem] font-bold uppercase tracking-wider"
         >
-          Drift
+          {t("touch.drift")}
         </TouchButton>
         <TouchButton
           action="reset"
-          label="Reset giro"
+          label={t("action.reset")}
           className="h-12 w-16 text-[0.6rem] font-bold uppercase tracking-wider"
         >
-          Reset
+          {t("touch.reset")}
         </TouchButton>
       </div>
 
@@ -115,6 +117,7 @@ export function TouchControls() {
 
 // Full-screen hint shown on phones held in portrait during a race.
 export function RotateOverlay() {
+  const t = useT();
   return (
     <div className="pointer-events-none absolute inset-0 z-30 hidden items-center justify-center bg-background/80 backdrop-blur-sm [@media(pointer:coarse)_and_(orientation:portrait)]:flex">
       <div className="flex flex-col items-center gap-4 px-8 text-center">
@@ -133,10 +136,10 @@ export function RotateOverlay() {
           <path d="M20 8l2 2-2 2" />
         </svg>
         <p className="text-sm font-bold uppercase tracking-[0.25em] text-foreground">
-          Ruota il telefono
+          {t("touch.rotate")}
         </p>
         <p className="text-xs text-muted-foreground">
-          Metti lo schermo in orizzontale per correre.
+          {t("touch.rotateHint")}
         </p>
       </div>
     </div>

@@ -3,8 +3,10 @@ import { useTracksStore } from "./tracksStore";
 import { formatTime, useRaceStore } from "./store";
 import { useBestTimesStore } from "./bestTimesStore";
 import { useLeaderboardStore } from "./leaderboardStore";
+import { useT } from "./i18n";
 
 function TrackDetail({ slot, onBack }: { slot: number; onBack: () => void }) {
+  const t = useT();
   const tracks = useTracksStore((s) => s.tracks);
   const startRace = useRaceStore((s) => s.startRace);
   const best = useBestTimesStore((s) => s.times)[slot]?.total;
@@ -23,20 +25,20 @@ function TrackDetail({ slot, onBack }: { slot: number; onBack: () => void }) {
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-foreground/50">
-            Pista {String(slot).padStart(2, "0")}
+            {t("track.label")} {String(slot).padStart(2, "0")}
           </p>
-          <h2 className="text-lg font-black text-foreground">{track?.name ?? "Pista"}</h2>
+          <h2 className="text-lg font-black text-foreground">{track?.name ?? t("track.label")}</h2>
         </div>
         <button
           onClick={onBack}
           className="shrink-0 rounded-full border border-border/60 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
         >
-          Indietro
+          {t("track.back")}
         </button>
       </div>
 
       <div className="mb-4 flex items-center justify-between gap-3 rounded-lg border border-border/60 px-3 py-2">
-        <span className="text-xs text-muted-foreground">Il tuo record</span>
+        <span className="text-xs text-muted-foreground">{t("track.yourBest")}</span>
         <span className="font-mono text-sm tabular-nums text-primary">
           {best != null ? formatTime(best) : "--:--"}
         </span>
@@ -46,18 +48,18 @@ function TrackDetail({ slot, onBack }: { slot: number; onBack: () => void }) {
         onClick={startRace}
         className="mb-5 w-full rounded-full bg-primary px-8 py-3 text-sm font-bold uppercase tracking-widest text-primary-foreground transition-transform hover:scale-[1.02]"
       >
-        Vai in pista
+        {t("track.go")}
       </button>
 
       {userId ? (
         <>
           <label className="mb-1 block text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-foreground/50">
-            Il tuo nome in classifica
+            {t("track.yourName")}
           </label>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Pilota"
+            placeholder={t("track.namePlaceholder")}
             maxLength={24}
             className="mb-4 w-full rounded-lg border border-border/60 bg-background px-3 py-2 text-sm font-semibold text-foreground outline-none focus:border-primary"
           />
@@ -65,24 +67,24 @@ function TrackDetail({ slot, onBack }: { slot: number; onBack: () => void }) {
       ) : (
         <div className="mb-4 rounded-lg border border-border/60 px-3 py-3 text-center">
           <p className="mb-2 text-xs text-muted-foreground">
-            Accedi con email o Google per salvare i progressi ed entrare in classifica
+            {t("track.signInPrompt")}
           </p>
           <a
             href="/auth"
             className="inline-block rounded-full border border-primary px-5 py-2 text-xs font-bold uppercase tracking-widest text-primary transition-colors hover:bg-primary/10"
           >
-            Accedi
+            {t("track.signIn")}
           </a>
         </div>
       )}
 
       <h3 className="mb-2 text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-foreground/50">
-        Classifica mondiale
+        {t("track.worldLeaderboard")}
       </h3>
-      {loading && <p className="text-xs text-muted-foreground">Carico la classifica…</p>}
+      {loading && <p className="text-xs text-muted-foreground">{t("track.loadingBoard")}</p>}
       {error && <p className="text-xs text-destructive">{error}</p>}
       {!loading && entries.length === 0 && (
-        <p className="text-xs text-muted-foreground">Nessun tempo ancora. Sii il primo!</p>
+        <p className="text-xs text-muted-foreground">{t("track.noTimes")}</p>
       )}
 
       <ol className="space-y-1">
@@ -107,6 +109,7 @@ function TrackDetail({ slot, onBack }: { slot: number; onBack: () => void }) {
 }
 
 export function TracksPanel({ onClose }: { onClose: () => void }) {
+  const t = useT();
   const { tracks, selected, select, loading, error, isAdmin, email, claimAdmin, signOut } =
     useTracksStore();
   const openEditor = useRaceStore((s) => s.openEditor);
@@ -125,17 +128,17 @@ export function TracksPanel({ onClose }: { onClose: () => void }) {
         <>
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-sm font-bold uppercase tracking-[0.25em] text-foreground">
-              Piste ufficiali
+              {t("tracks.title")}
             </h2>
             <button
               onClick={onClose}
               className="rounded-full border border-border/60 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
             >
-              Chiudi
+              {t("tracks.close")}
             </button>
           </div>
 
-          {loading && <p className="text-xs text-muted-foreground">Carico le piste…</p>}
+          {loading && <p className="text-xs text-muted-foreground">{t("tracks.loading")}</p>}
           {error && <p className="text-xs text-destructive">{error}</p>}
 
           <div className="grid gap-2 sm:grid-cols-2">
@@ -171,55 +174,55 @@ export function TracksPanel({ onClose }: { onClose: () => void }) {
               onClick={clearAllTimes}
               className="rounded-full border border-border/60 px-4 py-2 text-[0.65rem] font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
             >
-              Azzera record
+              {t("tracks.clearRecords")}
             </button>
           </div>
 
           <div className="mt-5 border-t border-border/50 pt-4 text-xs">
             {isAdmin ? (
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="text-muted-foreground">Admin: {email}</span>
+                <span className="text-muted-foreground">{t("tracks.admin")}: {email}</span>
                 <div className="flex gap-2">
                   <button
                     onClick={openEditor}
                     className="rounded-full bg-primary px-4 py-2 font-bold uppercase tracking-widest text-primary-foreground"
                   >
-                    Modifica pista
+                    {t("tracks.editTrack")}
                   </button>
                   <button
                     onClick={signOut}
                     className="rounded-full border border-border/60 px-4 py-2 font-bold uppercase tracking-widest text-foreground"
                   >
-                    Esci
+                    {t("tracks.signOut")}
                   </button>
                 </div>
               </div>
             ) : email ? (
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="text-muted-foreground">Connesso: {email}</span>
+                <span className="text-muted-foreground">{t("tracks.connected")}: {email}</span>
                 <div className="flex gap-2">
                   <button
                     onClick={claimAdmin}
                     className="rounded-full border border-border/60 px-4 py-2 font-bold uppercase tracking-widest text-foreground"
                   >
-                    Diventa admin
+                    {t("tracks.becomeAdmin")}
                   </button>
                   <button
                     onClick={signOut}
                     className="rounded-full border border-border/60 px-4 py-2 font-bold uppercase tracking-widest text-foreground"
                   >
-                    Esci
+                    {t("tracks.signOut")}
                   </button>
                 </div>
               </div>
             ) : (
               <div className="flex items-center justify-between gap-2">
-                <span className="text-muted-foreground">Le piste sono uguali per tutti.</span>
+                <span className="text-muted-foreground">{t("tracks.sameForAll")}</span>
                 <a
                   href="/auth"
                   className="rounded-full border border-border/60 px-4 py-2 font-bold uppercase tracking-widest text-foreground"
                 >
-                  Accesso staff
+                  {t("tracks.staffAccess")}
                 </a>
               </div>
             )}
