@@ -7,16 +7,16 @@ export const Route = createFileRoute("/auth")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Accedi — Poly Rush" },
+      { title: "Accedi — Formula-Track" },
       {
         name: "description",
         content:
-          "Area riservata di Poly Rush: accedi per gestire le 24 piste ufficiali del circuito low-poly.",
+          "Area riservata di Formula-Track: accedi per gestire le 24 piste ufficiali del circuito low-poly.",
       },
-      { property: "og:title", content: "Accedi — Poly Rush" },
+      { property: "og:title", content: "Accedi — Formula-Track" },
       {
         property: "og:description",
-        content: "Area riservata per la gestione delle 24 piste ufficiali di Poly Rush.",
+        content: "Area riservata per la gestione delle 24 piste ufficiali di Formula-Track.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },

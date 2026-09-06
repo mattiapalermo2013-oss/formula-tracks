@@ -77,9 +77,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Poly Rush — Gioco di corse 3D low-poly" },
+      { title: "Formula-Track — Gioco di corse 3D low-poly" },
       { name: "description", content: "Gioco di corse arcade low-poly giocabile nel browser." },
-      { property: "og:title", content: "Poly Rush — Gioco di corse 3D low-poly" },
+      { property: "og:title", content: "Formula-Track — Gioco di corse 3D low-poly" },
       { property: "og:description", content: "Gioco di corse arcade low-poly giocabile nel browser." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
