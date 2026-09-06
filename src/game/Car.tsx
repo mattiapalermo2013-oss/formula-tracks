@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { trackQuery, yawAt, pitExtensionAt, PIT_STOP_SECONDS, type Track } from "./track";
+import { trackQuery, yawAt, pitExtensionAt, pitGapAt, PIT_STOP_SECONDS, type Track } from "./track";
 import { useTrackStore } from "./trackStore";
 import { useKeyboard } from "./useKeyboard";
 import { useRaceStore } from "./store";
@@ -240,7 +240,7 @@ export function Car({ groupRef }: { groupRef: React.RefObject<THREE.Group | null
       if (trk.pit) {
         const extra = pitExtensionAt(trk, s.trackIdx);
         const halfHere = trk.samples[s.trackIdx]!.half;
-        const inLane = extra > 1.5 && hit.lat * trk.pit.side > halfHere - 1.2;
+        const inLane = extra > 1.5 && hit.lat * trk.pit.side > halfHere - 1.2 + pitGapAt(trk, s.trackIdx) + 0.2;
         const dBox = Math.abs(((s.trackIdx - trk.pit.box + trk.count * 1.5) % trk.count) - trk.count * 0.5);
         const speedNow = Math.hypot(s.vx, s.vz);
         if (!inLane) {

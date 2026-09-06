@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { PIECE_DEFS } from "./blocks";
-import { useTrackStore } from "./trackStore";
+import { START_MOVE_STEP, useTrackStore } from "./trackStore";
 import { useRaceStore } from "./store";
 import { useTracksStore } from "./tracksStore";
 import { useStaffStore } from "./staffStore";
@@ -10,7 +10,8 @@ export function Editor() {
   const t = useT();
   const phase = useRaceStore((s) => s.phase);
   const startRace = useRaceStore((s) => s.startRace);
-  const { pieces, track, add, undo, clear, useDefault } = useTrackStore();
+  const { pieces, track, start, add, undo, clear, useDefault, rotateStart, moveStart, resetStart } =
+    useTrackStore();
   const { tracks, selected, select, saving, error, save } = useTracksStore();
   const isAdmin = useStaffStore((s) => s.unlocked);
   const [name, setName] = useState("");
@@ -76,6 +77,66 @@ export function Editor() {
         <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
           <span>{pieces.length} {t("editor.blocks")}</span>
           <span>{Math.round(track.length)} m</span>
+        </div>
+
+        <div className="mt-4 rounded-lg border border-border/50 bg-background/40 p-3">
+          <p className="text-[0.65rem] font-semibold uppercase tracking-[0.2em] text-foreground/50">
+            {t("editor.start")}
+          </p>
+          <p className="mt-0.5 text-[0.7rem] text-muted-foreground">{t("editor.startHint")}</p>
+          <div className="mt-2 flex items-center gap-3">
+            <div className="grid grid-cols-3 gap-1" aria-label={t("editor.startMove")}>
+              <span />
+              <button
+                onClick={() => moveStart(0, -START_MOVE_STEP)}
+                className="rounded-md border border-border/50 px-2 py-1 text-xs text-foreground transition-colors hover:bg-foreground/10"
+              >
+                ↑
+              </button>
+              <span />
+              <button
+                onClick={() => moveStart(-START_MOVE_STEP, 0)}
+                className="rounded-md border border-border/50 px-2 py-1 text-xs text-foreground transition-colors hover:bg-foreground/10"
+              >
+                ←
+              </button>
+              <span
+                className="flex items-center justify-center text-base text-primary transition-transform"
+                style={{ transform: `rotate(${(-start.yaw * 180) / Math.PI}deg)` }}
+                title={`${Math.round(((start.yaw % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2) * 180 / Math.PI)}°`}
+              >
+                ➤
+              </span>
+              <button
+                onClick={() => moveStart(START_MOVE_STEP, 0)}
+                className="rounded-md border border-border/50 px-2 py-1 text-xs text-foreground transition-colors hover:bg-foreground/10"
+              >
+                →
+              </button>
+              <span />
+              <button
+                onClick={() => moveStart(0, START_MOVE_STEP)}
+                className="rounded-md border border-border/50 px-2 py-1 text-xs text-foreground transition-colors hover:bg-foreground/10"
+              >
+                ↓
+              </button>
+              <span />
+            </div>
+            <div className="flex flex-1 flex-col gap-1.5">
+              <button
+                onClick={rotateStart}
+                className="rounded-md border border-border/50 px-2 py-1.5 text-[0.7rem] font-semibold uppercase tracking-wider text-foreground transition-colors hover:bg-foreground/10"
+              >
+                ⟳ {t("editor.startRotate")}
+              </button>
+              <button
+                onClick={resetStart}
+                className="rounded-md border border-border/50 px-2 py-1.5 text-[0.7rem] font-semibold uppercase tracking-wider text-foreground transition-colors hover:bg-foreground/10"
+              >
+                {t("editor.startReset")}
+              </button>
+            </div>
+          </div>
         </div>
 
         <button

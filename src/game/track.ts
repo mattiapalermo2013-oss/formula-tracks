@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { BASE_HALF, buildPolyline, type PieceType } from "./blocks";
+import { BASE_HALF, buildPolyline, type PieceType, type StartPose } from "./blocks";
 
 // ---------------------------------------------------------------------------
 // A Track is the resampled centerline of a block layout. Geometry, collision
@@ -97,8 +97,8 @@ function smoothScalar(vals: number[], passes: number): number[] {
   return out;
 }
 
-export function buildTrack(pieces: PieceType[]): Track {
-  const poly = buildPolyline(pieces);
+export function buildTrack(pieces: PieceType[], startPose?: StartPose): Track {
+  const poly = buildPolyline(pieces, startPose);
   const rs = resample(poly.points, poly.widths, poly.marks, 1.5);
   const pts = smooth(rs.points, 2);
   const widths = smoothScalar(rs.widths, 6);
@@ -126,35 +126,31 @@ export function buildTrack(pieces: PieceType[]): Track {
 
 // --- Pit lane -------------------------------------------------------------
 export const PIT_WIDTH = 7.5;
+export const PIT_GAP = 2.6; // separation strip between main straight and pit lane
 export const PIT_RAMP = 8; // samples used to taper the lane open/close
 export const PIT_STOP_SECONDS = 3;
 
-// The pit lane sits on the longest straight (the "main straight"), on the
-// inside-free right hand side, so entry and exit are never mid-corner.
+// The pit lane sits on the start/finish straight (the straight containing
+// sample 0), detached from the main straight by a narrow strip + wall.
 function findPitZone(samples: TrackSample[], count: number): PitZone | null {
   const straight = (i: number) => {
     const a = samples[i]!.tangent;
     const b = samples[(i + 1) % count]!.tangent;
     return Math.abs(Math.atan2(a.x, a.z) - Math.atan2(b.x, b.z)) < 0.035;
   };
-  let bestStart = -1;
-  let bestLen = 0;
-  let runStart = -1;
-  let run = 0;
-  for (let i = 0; i < count * 2; i++) {
-    if (straight(i % count)) {
-      if (run === 0) runStart = i;
-      run++;
-      if (run > bestLen && run <= count) {
-        bestLen = run;
-        bestStart = runStart;
-      }
-    } else {
-      run = 0;
-    }
+  // Find the straight run that contains the start line (index 0).
+  let runStart = 0;
+  let guard = 0;
+  while (straight((runStart - 1 + count) % count) && guard++ < count) {
+    runStart = (runStart - 1 + count) % count;
   }
+  let bestLen = 0;
+  guard = 0;
+  while (straight((runStart + bestLen) % count) && guard++ < count) bestLen++;
+  if (bestLen <= 0) return null;
+  const bestStart = runStart;
   const minLen = PIT_RAMP * 2 + 16;
-  if (bestStart < 0 || bestLen < minLen) return null;
+  if (bestLen < minLen) return null;
   const margin = Math.max(2, Math.floor((bestLen - minLen) / 4));
   const start = (bestStart + margin) % count;
   const len = bestLen - margin * 2;
@@ -179,6 +175,13 @@ export function pitExtensionAt(track: Track, index: number): number {
   const pit = track.pit;
   if (!pit) return 0;
   return pitProgress(track, index) * pit.width;
+}
+
+/** Width of the closed separator strip between main straight and pit lane. */
+export function pitGapAt(track: Track, index: number): number {
+  const pit = track.pit;
+  if (!pit) return 0;
+  return pitProgress(track, index) * PIT_GAP;
 }
 
 export function yawAt(track: Track, index: number): number {
@@ -213,9 +216,28 @@ export function trackQuery(track: Track, px: number, pz: number, prevIndex: numb
   const r = s.right;
   const lat = (px - s.pos.x) * r.x + (pz - s.pos.z) * r.y;
   const pitSide = track.pit ? track.pit.side : 1;
-  const extra = Math.sign(lat) === pitSide ? pitExtensionAt(track, best) : 0;
-  const limit = s.half - 1.2 + extra;
-  if (Math.abs(lat) > limit) {
+  const side = Math.sign(lat) || 1;
+  const extra = side === pitSide ? pitExtensionAt(track, best) : 0;
+  const gap = side === pitSide ? pitGapAt(track, best) : 0;
+  const inner = s.half - 1.2;
+  const absLat = Math.abs(lat);
+  // Separator strip: a wall splits the main straight from the pit lane where
+  // the lane is open; the car gets pushed to whichever side is nearer.
+  if (gap > 0.4 && absLat > inner && absLat < inner + gap) {
+    const mid = inner + gap / 2;
+    const bound = absLat < mid ? inner : inner + gap;
+    const push = absLat - bound;
+    return {
+      index: best,
+      lat,
+      groundY: s.pos.y,
+      offTrack: true,
+      pushX: -side * r.x * push,
+      pushZ: -side * r.y * push,
+    };
+  }
+  const limit = inner + extra;
+  if (absLat > limit) {
     const sign = Math.sign(lat);
     const push = Math.abs(lat) - limit;
     return {
