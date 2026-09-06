@@ -116,12 +116,8 @@ export const useTracksStore = create<TracksState>((set, get) => ({
     }));
   },
 
+  // Admin rights now come from the staff password gate, not from a DB claim.
   claimAdmin: async () => {
-    const { error } = await supabase.rpc("claim_admin");
-    if (error) {
-      set({ error: error.message });
-      return;
-    }
     await get().refreshAuth();
   },
 
