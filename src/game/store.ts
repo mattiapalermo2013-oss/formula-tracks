@@ -134,20 +134,7 @@ export const useRaceStore = create<RaceStore>((set, get) => ({
       void submitCrazyScore(total);
     }
   },
-  reset: () =>
-    set({
-      phase: "ready",
-      lap: 1,
-      checkpoint: 0,
-      speed: 0,
-      elapsed: 0,
-      lastLap: null,
-      raceTime: null,
-      raceDelta: null,
-      splits: [],
-      lastSplit: null,
-      bestLap: loadBest(),
-    }),
+  reset: () => set({ phase: "ready", speed: 0, ...cleared, bestLap: loadBest() }),
 }));
 
 export { LAPS_TO_WIN };
