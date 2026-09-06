@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import { supabase } from "@/integrations/supabase/client";
+import { ghostFlat, ghostInfo, ghostSetExternal } from "./ghost";
+import { useLiveryStore } from "./liveryStore";
 
 const NAME_KEY = "polyrush-player-name";
 const PLAYER_KEY = "polyrush-player-id";
@@ -11,6 +13,7 @@ export interface LapEntry {
   time_ms: number;
   created_at: string;
   user_id: string;
+  hasGhost?: boolean;
 }
 
 function randomUuid(): string {
@@ -72,6 +75,7 @@ interface LeaderboardState {
   submit: (slot: number, seconds: number) => Promise<void>;
   rankFor: (slot: number, time_ms: number) => Promise<void>;
   clearRank: () => void;
+  loadGhost: (entry: LapEntry) => Promise<boolean>;
 }
 
 export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
@@ -119,7 +123,14 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
       set({ loading: false, error: error.message });
       return;
     }
-    set({ entries: (data ?? []) as LapEntry[], loading: false });
+    const rows = (data ?? []) as LapEntry[];
+    const { data: withGhost } = await supabase
+      .from("lap_times")
+      .select("id")
+      .eq("slot", slot)
+      .not("ghost", "is", null);
+    const ghostIds = new Set((withGhost ?? []).map((r) => r.id as string));
+    set({ entries: rows.map((r) => ({ ...r, hasGhost: ghostIds.has(r.id) })), loading: false });
   },
 
   submit: async (slot, seconds) => {
@@ -142,10 +153,19 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
       return;
     }
 
+    const livery = useLiveryStore.getState();
     const { error } = await supabase
       .from("lap_times")
       .upsert(
-        { slot, player_name: name, time_ms, user_id: id },
+        {
+          slot,
+          player_name: name,
+          time_ms,
+          user_id: id,
+          // the recording only belongs to this player when no other ghost is pinned
+          ghost: ghostInfo.pinned ? null : ghostFlat(),
+          livery: { body: livery.body, accent: livery.accent },
+        },
         { onConflict: "slot,user_id" },
       );
     if (error) {
@@ -154,6 +174,18 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
     }
     await get().rankFor(slot, time_ms);
     await get().fetch(slot);
+  },
+
+  /** Downloads another player's recorded lap and makes it the active ghost. */
+  loadGhost: async (entry) => {
+    const { data, error } = await supabase
+      .from("lap_times")
+      .select("ghost,livery,player_name")
+      .eq("id", entry.id)
+      .maybeSingle();
+    if (error || !data?.ghost || !Array.isArray(data.ghost)) return false;
+    const livery = (data.livery ?? {}) as { body?: string; accent?: string };
+    return ghostSetExternal(data.ghost as number[], data.player_name ?? entry.player_name, livery);
   },
 
   rankFor: async (slot: number, time_ms: number) => {
