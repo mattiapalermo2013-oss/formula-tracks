@@ -16,11 +16,20 @@ export interface TrackSample {
   half: number; // half road width at this sample
 }
 
+export interface PitZone {
+  start: number; // sample index where the lane opens
+  end: number; // sample index where it closes (may wrap)
+  box: number; // sample index of the pit box
+  side: 1 | -1; // lateral side of the lane
+  width: number; // lane width added to the road half width
+}
+
 export interface Track {
   samples: TrackSample[];
   count: number;
   checkpoints: number[];
   length: number;
+  pit: PitZone | null;
 }
 
 interface Resampled {
