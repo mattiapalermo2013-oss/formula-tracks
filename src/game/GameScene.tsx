@@ -9,6 +9,7 @@ import { SkidMarks } from "./SkidMarks";
 import { ChaseCamera } from "./ChaseCamera";
 import { EditorCamera } from "./EditorCamera";
 import { useRaceStore } from "./store";
+import { Mountains } from "./Mountains";
 
 function Ground() {
   return (
@@ -60,6 +61,7 @@ export function GameScene() {
       </Environment>
 
       <Ground />
+      <Mountains />
       <TrackMesh />
       <SkidMarks />
       <Suspense fallback={null}>

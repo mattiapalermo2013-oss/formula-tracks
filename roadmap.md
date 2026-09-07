@@ -10,5 +10,6 @@
 - [x] Pit lane + giri continui
 - [x] Rollio anomalo in retromarcia (slip ~180°) corretto
 - [x] Scritta ultimo giro scompare dopo ~6.5s
-- [ ] Azzerare tutti i record mondiali (lap_times) dopo il cambio velocità
+- [x] Azzerare tutti i record mondiali (lap_times) dopo il cambio velocità
 - [x] Editor: scelta punto/direzione di partenza della pista
+- [x] Montagne verdi low-poly ai bordi, lontane dalla pista
