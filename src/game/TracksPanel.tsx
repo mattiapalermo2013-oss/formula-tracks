@@ -115,7 +115,9 @@ function TrackDetail({ slot, onBack }: { slot: number; onBack: () => void }) {
           <li
             key={e.id}
             className={`flex items-center gap-3 rounded-lg border px-3 py-2 ${
-              e.user_id === userId ? "border-primary bg-primary/15" : "border-border/60"
+              e.player_name === name.trim() && name.trim()
+                ? "border-primary bg-primary/15"
+                : "border-border/60"
             }`}
           >
 
