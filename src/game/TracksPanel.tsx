@@ -154,7 +154,7 @@ export function TracksPanel({ onClose }: { onClose: () => void }) {
   const isAdmin = useStaffStore((s) => s.unlocked);
   const openEditor = useRaceStore((s) => s.openEditor);
   const bestTimes = useBestTimesStore((s) => s.times);
-  const clearAllTimes = useBestTimesStore((s) => s.clearAll);
+  
   const [detail, setDetail] = useState<number | null>(null);
 
   return (
@@ -207,15 +207,6 @@ export function TracksPanel({ onClose }: { onClose: () => void }) {
                 </button>
               );
             })}
-          </div>
-
-          <div className="mt-4 flex justify-end">
-            <button
-              onClick={clearAllTimes}
-              className="rounded-full border border-border/60 px-4 py-2 text-[0.65rem] font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-foreground/10"
-            >
-              {t("tracks.clearRecords")}
-            </button>
           </div>
 
           {isAdmin && (
