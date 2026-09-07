@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { supabase } from "@/integrations/supabase/client";
 import { ghostFlat, ghostInfo, ghostSetExternal } from "./ghost";
 import { useLiveryStore } from "./liveryStore";
+import { useBestTimesStore } from "./bestTimesStore";
 
 const NAME_KEY = "polyrush-player-name";
 const PLAYER_KEY = "polyrush-player-id";
