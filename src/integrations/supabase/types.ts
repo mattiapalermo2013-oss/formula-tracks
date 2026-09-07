@@ -94,39 +94,7 @@ export type Database = {
       }
     }
     Views: {
-      leaderboard: {
-        Row: {
-          created_at: string | null
-          ghost: Json | null
-          has_ghost: boolean | null
-          id: string | null
-          livery: Json | null
-          player_name: string | null
-          slot: number | null
-          time_ms: number | null
-        }
-        Insert: {
-          created_at?: string | null
-          ghost?: Json | null
-          has_ghost?: never
-          id?: string | null
-          livery?: Json | null
-          player_name?: string | null
-          slot?: number | null
-          time_ms?: number | null
-        }
-        Update: {
-          created_at?: string | null
-          ghost?: Json | null
-          has_ghost?: never
-          id?: string | null
-          livery?: Json | null
-          player_name?: string | null
-          slot?: number | null
-          time_ms?: number | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       has_role: {
