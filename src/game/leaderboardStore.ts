@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { supabase } from "@/integrations/supabase/client";
 import { ghostFlat, ghostInfo, ghostSetExternal } from "./ghost";
 import { useLiveryStore } from "./liveryStore";
+import { useBestTimesStore } from "./bestTimesStore";
 
 const NAME_KEY = "polyrush-player-name";
 const PLAYER_KEY = "polyrush-player-id";
@@ -12,7 +13,6 @@ export interface LapEntry {
   player_name: string;
   time_ms: number;
   created_at: string;
-  user_id: string;
   hasGhost?: boolean;
 }
 
@@ -115,7 +115,7 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
     set({ loading: true, error: null });
     const { data, error } = await supabase
       .from("lap_times")
-      .select("id,slot,player_name,time_ms,created_at,user_id")
+      .select("id,slot,player_name,time_ms,created_at")
       .eq("slot", slot)
       .order("time_ms", { ascending: true })
       .limit(100);
@@ -139,20 +139,6 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
 
     const { id, name } = await get().resolveIdentity();
 
-    // one row per player per track: keep only the best time
-    const { data: existing } = await supabase
-      .from("lap_times")
-      .select("id,time_ms")
-      .eq("slot", slot)
-      .eq("user_id", id)
-      .maybeSingle();
-
-    if (existing && existing.time_ms <= time_ms) {
-      await get().rankFor(slot, existing.time_ms);
-      await get().fetch(slot);
-      return;
-    }
-
     const livery = useLiveryStore.getState();
     const { error } = await supabase
       .from("lap_times")
@@ -169,6 +155,14 @@ export const useLeaderboardStore = create<LeaderboardState>((set, get) => ({
         { onConflict: "slot,user_id" },
       );
     if (error) {
+      // The database trigger rejects updates that are not faster than the
+      // stored record: treat that as "not improved", not as a failure.
+      if (error.message.includes("faster lap time")) {
+        const localBest = useBestTimesStore.getState().times[slot]?.total;
+        await get().rankFor(slot, localBest != null ? Math.round(localBest * 1000) : time_ms);
+        await get().fetch(slot);
+        return;
+      }
       set({ error: error.message });
       return;
     }
