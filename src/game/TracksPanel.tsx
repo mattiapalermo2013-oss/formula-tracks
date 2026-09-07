@@ -154,7 +154,7 @@ export function TracksPanel({ onClose }: { onClose: () => void }) {
   const isAdmin = useStaffStore((s) => s.unlocked);
   const openEditor = useRaceStore((s) => s.openEditor);
   const bestTimes = useBestTimesStore((s) => s.times);
-  const clearAllTimes = useBestTimesStore((s) => s.clearAll);
+  
   const [detail, setDetail] = useState<number | null>(null);
 
   return (
