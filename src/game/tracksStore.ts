@@ -59,22 +59,24 @@ export const useTracksStore = create<TracksState>((set, get) => ({
     set({ loading: true, error: null });
     const { data, error } = await supabase
       .from("tracks")
-      .select("slot,name,pieces")
+      .select("slot,name,pieces,start")
       .order("slot");
     if (error) {
       set({ loading: false, error: error.message });
       return;
     }
-    const tracks = (data ?? []).map((t) => ({
+    const tracks: TrackRow[] = (data ?? []).map((t) => ({
       slot: t.slot,
       name: t.name,
       pieces: (Array.isArray(t.pieces) ? t.pieces : []) as PieceType[],
+      start: parseStart((t as { start?: unknown }).start),
     }));
     set({ tracks, loading: false });
     const sel = get().selected;
     if (sel != null) {
       const row = tracks.find((t) => t.slot === sel);
-      if (row && row.pieces.length) useTrackStore.getState().setPieces(row.pieces);
+      if (row && row.pieces.length)
+        useTrackStore.getState().loadLayout(sel, row.pieces, row.start);
     }
   },
 
