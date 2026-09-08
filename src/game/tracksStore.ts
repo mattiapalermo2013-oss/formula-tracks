@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { supabase } from "@/integrations/supabase/client";
-import type { PieceType } from "./blocks";
+import type { PieceType, StartPose } from "./blocks";
 import { useTrackStore } from "./trackStore";
 import { useStaffStore } from "./staffStore";
 import { saveTrackAsStaff } from "@/lib/staff.functions";
@@ -12,6 +12,15 @@ export interface TrackRow {
   slot: number;
   name: string;
   pieces: PieceType[];
+  /** Each track carries its own start line; null falls back to the local one. */
+  start: StartPose | null;
+}
+
+function parseStart(v: unknown): StartPose | null {
+  const p = v as Partial<StartPose> | null;
+  return p && Number.isFinite(p.x) && Number.isFinite(p.z) && Number.isFinite(p.yaw)
+    ? { x: p.x as number, z: p.z as number, yaw: p.yaw as number }
+    : null;
 }
 
 interface TracksState {
@@ -25,7 +34,7 @@ interface TracksState {
   fetchAll: () => Promise<void>;
   refreshAuth: () => Promise<void>;
   select: (slot: number) => void;
-  save: (slot: number, name: string, pieces: PieceType[]) => Promise<void>;
+  save: (slot: number, name: string, pieces: PieceType[], start: StartPose) => Promise<void>;
   claimAdmin: () => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -50,22 +59,24 @@ export const useTracksStore = create<TracksState>((set, get) => ({
     set({ loading: true, error: null });
     const { data, error } = await supabase
       .from("tracks")
-      .select("slot,name,pieces")
+      .select("slot,name,pieces,start")
       .order("slot");
     if (error) {
       set({ loading: false, error: error.message });
       return;
     }
-    const tracks = (data ?? []).map((t) => ({
+    const tracks: TrackRow[] = (data ?? []).map((t) => ({
       slot: t.slot,
       name: t.name,
       pieces: (Array.isArray(t.pieces) ? t.pieces : []) as PieceType[],
+      start: parseStart((t as { start?: unknown }).start),
     }));
     set({ tracks, loading: false });
     const sel = get().selected;
     if (sel != null) {
       const row = tracks.find((t) => t.slot === sel);
-      if (row && row.pieces.length) useTrackStore.getState().setPieces(row.pieces);
+      if (row && row.pieces.length)
+        useTrackStore.getState().loadLayout(sel, row.pieces, row.start);
     }
   },
 
@@ -90,10 +101,10 @@ export const useTracksStore = create<TracksState>((set, get) => ({
     const row = get().tracks.find((t) => t.slot === slot);
     set({ selected: slot });
     if (typeof window !== "undefined") localStorage.setItem(SLOT_KEY, String(slot));
-    if (row && row.pieces.length) useTrackStore.getState().setPieces(row.pieces);
+    if (row && row.pieces.length) useTrackStore.getState().loadLayout(slot, row.pieces, row.start);
   },
 
-  save: async (slot, name, pieces) => {
+  save: async (slot, name, pieces, start) => {
     set({ saving: true, error: null });
     const password = useStaffStore.getState().password;
     if (!password) {
@@ -101,7 +112,7 @@ export const useTracksStore = create<TracksState>((set, get) => ({
       return;
     }
     try {
-      const res = await saveTrackAsStaff({ data: { password, slot, name, pieces } });
+      const res = await saveTrackAsStaff({ data: { password, slot, name, pieces, start } });
       if (!res.ok) {
         set({ saving: false, error: "staff" });
         return;
@@ -112,7 +123,7 @@ export const useTracksStore = create<TracksState>((set, get) => ({
     }
     set((s) => ({
       saving: false,
-      tracks: s.tracks.map((t) => (t.slot === slot ? { ...t, name, pieces } : t)),
+      tracks: s.tracks.map((t) => (t.slot === slot ? { ...t, name, pieces, start } : t)),
     }));
   },
 

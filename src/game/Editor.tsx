@@ -175,7 +175,7 @@ export function Editor() {
               disabled={saving || selected == null || !name.trim()}
               onClick={async () => {
                 if (selected == null) return;
-                await save(selected, name.trim(), pieces);
+                await save(selected, name.trim(), pieces, start);
                 setSavedAt(true);
               }}
               className="mt-2 w-full rounded-full border border-primary bg-primary/15 px-6 py-2.5 text-xs font-bold uppercase tracking-widest text-foreground transition-colors hover:bg-primary/25 disabled:opacity-40"
