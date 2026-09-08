@@ -16,11 +16,6 @@ let skidGain: GainNode | null = null;
 
 let enabled = true;
 
-// gearbox state
-const GEARS = 6;
-let gear = 1;
-let shiftUntil = 0;
-
 function noiseBuffer(c: AudioContext): AudioBuffer {
   const len = c.sampleRate * 2;
   const buf = c.createBuffer(1, len, c.sampleRate);
