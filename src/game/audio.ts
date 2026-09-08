@@ -45,7 +45,8 @@ function ensure(): boolean {
     const curve = new Float32Array(1024);
     for (let i = 0; i < 1024; i++) {
       const x = (i / 1023) * 2 - 1;
-      curve[i] = Math.tanh(x * 2.2);
+      // Asymmetric soft-clip: combustion pulses, warmer/dirtier than a clean tone.
+      curve[i] = Math.tanh(x * 3.4 + 0.15) * 0.92;
     }
     shaper.curve = curve;
     shaper.connect(engGain);
