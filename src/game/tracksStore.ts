@@ -34,7 +34,7 @@ interface TracksState {
   fetchAll: () => Promise<void>;
   refreshAuth: () => Promise<void>;
   select: (slot: number) => void;
-  save: (slot: number, name: string, pieces: PieceType[]) => Promise<void>;
+  save: (slot: number, name: string, pieces: PieceType[], start: StartPose) => Promise<void>;
   claimAdmin: () => Promise<void>;
   signOut: () => Promise<void>;
 }
