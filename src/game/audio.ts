@@ -16,11 +16,6 @@ let skidGain: GainNode | null = null;
 
 let enabled = true;
 
-// gearbox state
-const GEARS = 6;
-let gear = 1;
-let shiftUntil = 0;
-
 function noiseBuffer(c: AudioContext): AudioBuffer {
   const len = c.sampleRate * 2;
   const buf = c.createBuffer(1, len, c.sampleRate);
@@ -50,7 +45,8 @@ function ensure(): boolean {
     const curve = new Float32Array(1024);
     for (let i = 0; i < 1024; i++) {
       const x = (i / 1023) * 2 - 1;
-      curve[i] = Math.tanh(x * 2.2);
+      // Asymmetric soft-clip: combustion pulses, warmer/dirtier than a clean tone.
+      curve[i] = Math.tanh(x * 3.4 + 0.15) * 0.92;
     }
     shaper.curve = curve;
     shaper.connect(engGain);
@@ -63,12 +59,12 @@ function ensure(): boolean {
 
     // Harmonic stack: firing order partials, slightly detuned = mechanical, not synthy.
     const stack: Array<[number, number, OscillatorType]> = [
-      [0.5, 0.5, "sawtooth"],
+      [0.25, 0.55, "sawtooth"], // crankshaft rumble
+      [0.5, 0.85, "square"], // half-order combustion pulse
       [1, 1, "sawtooth"],
-      [1.5, 0.35, "square"],
-      [2, 0.45, "sawtooth"],
-      [3, 0.22, "sawtooth"],
-      [4.5, 0.14, "square"],
+      [1.5, 0.28, "square"],
+      [2, 0.34, "sawtooth"],
+      [3, 0.14, "sawtooth"],
     ];
     partials = stack.map(([mult, amp, type]) => {
       const osc = ctx!.createOscillator();
