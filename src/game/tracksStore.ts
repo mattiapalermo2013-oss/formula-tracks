@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { supabase } from "@/integrations/supabase/client";
-import type { PieceType } from "./blocks";
+import type { PieceType, StartPose } from "./blocks";
 import { useTrackStore } from "./trackStore";
 import { useStaffStore } from "./staffStore";
 import { saveTrackAsStaff } from "@/lib/staff.functions";
