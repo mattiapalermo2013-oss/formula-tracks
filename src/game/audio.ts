@@ -59,12 +59,12 @@ function ensure(): boolean {
 
     // Harmonic stack: firing order partials, slightly detuned = mechanical, not synthy.
     const stack: Array<[number, number, OscillatorType]> = [
-      [0.5, 0.5, "sawtooth"],
+      [0.25, 0.55, "sawtooth"], // crankshaft rumble
+      [0.5, 0.85, "square"], // half-order combustion pulse
       [1, 1, "sawtooth"],
-      [1.5, 0.35, "square"],
-      [2, 0.45, "sawtooth"],
-      [3, 0.22, "sawtooth"],
-      [4.5, 0.14, "square"],
+      [1.5, 0.28, "square"],
+      [2, 0.34, "sawtooth"],
+      [3, 0.14, "sawtooth"],
     ];
     partials = stack.map(([mult, amp, type]) => {
       const osc = ctx!.createOscillator();
