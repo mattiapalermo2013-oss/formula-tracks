@@ -12,6 +12,15 @@ export interface TrackRow {
   slot: number;
   name: string;
   pieces: PieceType[];
+  /** Each track carries its own start line; null falls back to the local one. */
+  start: StartPose | null;
+}
+
+function parseStart(v: unknown): StartPose | null {
+  const p = v as Partial<StartPose> | null;
+  return p && Number.isFinite(p.x) && Number.isFinite(p.z) && Number.isFinite(p.yaw)
+    ? { x: p.x as number, z: p.z as number, yaw: p.yaw as number }
+    : null;
 }
 
 interface TracksState {
