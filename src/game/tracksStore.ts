@@ -112,7 +112,7 @@ export const useTracksStore = create<TracksState>((set, get) => ({
       return;
     }
     try {
-      const res = await saveTrackAsStaff({ data: { password, slot, name, pieces } });
+      const res = await saveTrackAsStaff({ data: { password, slot, name, pieces, start } });
       if (!res.ok) {
         set({ saving: false, error: "staff" });
         return;
