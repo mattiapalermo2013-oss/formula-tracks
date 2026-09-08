@@ -55,18 +55,21 @@ export type Database = {
           name: string
           pieces: Json
           slot: number
+          start: Json | null
           updated_at: string
         }
         Insert: {
           name: string
           pieces?: Json
           slot: number
+          start?: Json | null
           updated_at?: string
         }
         Update: {
           name?: string
           pieces?: Json
           slot?: number
+          start?: Json | null
           updated_at?: string
         }
         Relationships: []
