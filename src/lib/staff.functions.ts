@@ -29,14 +29,20 @@ export const resetLeaderboard = createServerFn({ method: "POST" })
 
 export const saveTrackAsStaff = createServerFn({ method: "POST" })
   .inputValidator(
-    (data: { password: string; slot: number; name: string; pieces: string[] }) => data,
+    (data: {
+      password: string;
+      slot: number;
+      name: string;
+      pieces: string[];
+      start?: { x: number; z: number; yaw: number } | null;
+    }) => data,
   )
   .handler(async ({ data }) => {
     if (!passwordOk(data.password)) return { ok: false as const };
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("tracks")
-      .update({ name: data.name.slice(0, 40), pieces: data.pieces })
+      .update({ name: data.name.slice(0, 40), pieces: data.pieces, start: data.start ?? null })
       .eq("slot", data.slot);
     if (error) throw new Error(error.message);
     return { ok: true as const };
