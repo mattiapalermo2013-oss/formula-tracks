@@ -123,7 +123,7 @@ export const useTracksStore = create<TracksState>((set, get) => ({
     }
     set((s) => ({
       saving: false,
-      tracks: s.tracks.map((t) => (t.slot === slot ? { ...t, name, pieces } : t)),
+      tracks: s.tracks.map((t) => (t.slot === slot ? { ...t, name, pieces, start } : t)),
     }));
   },
 
