@@ -101,10 +101,10 @@ export const useTracksStore = create<TracksState>((set, get) => ({
     const row = get().tracks.find((t) => t.slot === slot);
     set({ selected: slot });
     if (typeof window !== "undefined") localStorage.setItem(SLOT_KEY, String(slot));
-    if (row && row.pieces.length) useTrackStore.getState().setPieces(row.pieces);
+    if (row && row.pieces.length) useTrackStore.getState().loadLayout(slot, row.pieces, row.start);
   },
 
-  save: async (slot, name, pieces) => {
+  save: async (slot, name, pieces, start) => {
     set({ saving: true, error: null });
     const password = useStaffStore.getState().password;
     if (!password) {
